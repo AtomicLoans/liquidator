@@ -1,0 +1,13 @@
+{
+  "CHECK_TX_INTERVAL": "in 45 seconds",
+  "CHECK_BTC_TX_INTERVAL": "in 45 seconds",
+  "CHECK_ALL_RECORDS_INTERVAL": "2 minutes",
+  "ACTION_INTERVAL": "in 5 seconds",
+  "BUMP_TX_INTERVAL": "4 minute ago",
+  "ARBITER_STATUS_INTERVAL": "5 minutes",
+  "SECRETS_BUMP_TX_INTERVAL": "in 6 minutes",
+  "LENDER_CHECK_INTERVAL": "2 minutes",
+  "ARBITER_ORACLE_INTERVAL": "4 minutes",
+  "SANITIZE_TX_INTERVAL": "30 minutes",
+  "LOAN_SECRET_HASH_COUNT": 40
+}

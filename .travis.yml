@@ -1,0 +1,55 @@
+dist: xenial
+sudo: required
+language: node_js
+node_js:
+  - "8.12.0"
+cache: npm
+services:
+  - mongodb
+before_install:
+  - sudo apt-get install -y libusb-1.0-0 libusb-1.0-0-dev libudev-dev
+  - sudo apt-add-repository ppa:bitcoin/bitcoin -y
+  - sudo apt-get update
+  - sudo apt-get install bitcoind -y
+
+apt_packages:
+  - bitcoind
+
+before_script:
+  - yarn global add ganache-cli@6.4.3
+  - mkdir -p /home/travis/.bitcoin && cp bitcoin.conf /home/travis/.bitcoin/bitcoin.conf
+  - bitcoind -reindex -txindex -regtest -daemon -rpcport=18443 -rpcuser=bitcoin -rpcpassword=local321 -deprecatedrpc=signrawtransaction
+  - CI=false ganache-cli -k petersburg > /dev/null &
+  - export NODE_OPTIONS="--max-old-space-size=8192"
+  - cp .env.example .env
+  - cp test/env/.env.test.example test/env/.env.test
+  - CI=false npm run setup:test_json
+  - CI=false npm run deploy:contracts
+  - CI=false npm run arbiter:test &
+  - sleep 30
+  - CI=false npm run lender:test &
+  - sleep 30
+
+jobs:
+  include:
+    - stage: Test Main
+      script:
+        - CI=false npm run lint
+        - CI=false npm run test:lender:agent
+        - CI=false npm run test:lender:loan_market
+        - CI=false npm run test:lender:withdraw
+        - CI=false npm run test:lender:tx
+        - CI=false npm run test:modules
+        - CI=false npm run coverage
+    - stage: Test Sales
+      script:
+        - CI=false npm run test:lender:sales
+    - stage: Test E2E
+      script:
+        - CI=false npm run test:lender:e2e
+    - stage: Test Funds
+      script:
+        - CI=false npm run test:lender:funds
+    - stage: Test Loans
+      script:
+        - CI=false npm run test:lender:loans

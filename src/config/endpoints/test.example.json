@@ -1,0 +1,4 @@
+{
+  "LENDER_ENDPOINT": "http://localhost:3030/api/loan",
+  "ARBITER_ENDPOINT": "http://localhost:3032/api/loan"
+}

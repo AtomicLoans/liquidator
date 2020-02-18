@@ -1,0 +1,62 @@
+{
+  "name": "Atomic Agent",
+  "description": "Lending on autopilot",
+  "repository": "https://github.com/atomicloans/atomicagent",
+  "logo": "https://raw.githubusercontent.com/AtomicLoans/agent/dev/atomic-loans.png",
+  "keywords": ["atomic loans", "loans", "ethereum", "bitcoin", "cryptocurrency"],
+  "addons": ["mongolab:sandbox"],
+  "engines": {
+    "node": "8.12.0"
+  },
+  "env": {
+    "METAMASK_ETH_ADDRESS": {
+      "description": "Please enter the Ethereum address associated with your Metamask Wallet",
+      "value": ""
+    },
+    "MNEMONIC": {
+      "description": "(OPTIONAL) Enter a 12 word mnemonic if you are importing an existing agent",
+      "value": "",
+      "required": false
+    },
+    "HEROKU_APP": {
+      "description": "Please copy the App name that you entered earlier. MAKE SURE IT MATCHES!",
+      "require": true
+    },
+    "NPM_CONFIG_PRODUCTION": {
+      "description": "Don't worry about this. It should be true",
+      "value": "true"
+    },
+    "BTC_RPC": {
+      "description": "Bitcoin RPC Endpoint",
+      "require": true
+    },
+    "BTC_USER": {
+      "description": "Bitcoin RPC user",
+      "require": true
+    },
+    "BTC_PASS": {
+      "description": "Bitcoin RPC pass",
+      "require": true
+    },
+    "BTC_API": {
+      "description": "Bitcoin API Endpoint",
+      "require": true
+    },
+    "ETH_RPC": {
+      "description": "Ethereum RPC Endpoint",
+      "require": true
+    },
+    "NETWORK": {
+      "description": "Ethereum Network",
+      "required": true
+    },
+    "DASH_PASS": {
+      "description": "Jobs Dashboard Password",
+      "required": true
+    },
+    "BUGSNAG_API": {
+      "description": "Error monitoring",
+      "required": true
+    }
+  }
+}

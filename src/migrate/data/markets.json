@@ -1,0 +1,42 @@
+[
+  {
+    "from": "BTC",
+    "to": "ETH",
+    "min": 0.001,
+    "max": 0.05,
+    "minConf": 2,
+    "rate": 55.3,
+    "orderExpiresIn": 3600000,
+    "status": "ACTIVE"
+  },
+  {
+    "from": "ETH",
+    "to": "BTC",
+    "min": 0.25,
+    "max": 2.5,
+    "minConf": 1,
+    "rate": 0.018,
+    "orderExpiresIn": 3600000,
+    "status": "ACTIVE"
+  },
+  {
+    "from": "BTC",
+    "to": "SAI",
+    "min": 0.001,
+    "max": 0.05,
+    "minConf": 1,
+    "rate": 10311.20,
+    "orderExpiresIn": 3600000,
+    "status": "ACTIVE"
+  },
+  {
+    "from": "BTC",
+    "to": "USDC",
+    "min": 0.001,
+    "max": 0.05,
+    "minConf": 1,
+    "rate": 10311.20,
+    "orderExpiresIn": 3600000,
+    "status": "ACTIVE"
+  }
+]

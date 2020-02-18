@@ -1,0 +1,7 @@
+**/.git
+**/.env
+**/node_modules
+deploy
+deploy-lender
+.vscode
+.github
