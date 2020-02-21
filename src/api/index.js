@@ -72,7 +72,6 @@ app.use('/dash',
   Agendash(agenda)
 )
 
-app.use('/api/swap', require('./routes/swap'))
 app.use('/api/loan', require('./routes/loan/index'))
 
 app.set('views', path.join(__dirname, '/views'))

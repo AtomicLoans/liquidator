@@ -100,7 +100,7 @@ async function getLockParams (web3Chain, principal, values, loanId) {
 }
 
 function getTestContract (contract, principal) {
-  if (contract === 'erc20' || contract === 'ctoken') {
+  if (contract === 'erc20' || contract === 'ctoken' || contract === 'exampledaicoin') {
     const cPrefix = contract === 'ctoken' ? 'C' : ''
     return addresses[`${cPrefix}${principal}`]
   } else if (contract === 'medianizer' || contract === 'ondemandspv') {

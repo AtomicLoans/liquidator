@@ -9,8 +9,8 @@ const handleError = require('../../../utils/handleError')
 const web3 = require('../../../utils/web3')
 const date = require('date.js')
 
-function defineLoanApproveJobs (agenda) {
-  agenda.define('approve-loan', async (job, done) => {
+function defineLoanLiquidateJobs (agenda) {
+  agenda.define('liquidate-loan', async (job, done) => {
     const { data } = job.attrs
     const { loanModelId } = data
 
@@ -31,7 +31,7 @@ function defineLoanApproveJobs (agenda) {
     }
   })
 
-  agenda.define('verify-approve-loan-ish', async (job, done) => {
+  agenda.define('verify-liquidate-loan', async (job, done) => {
     const { data } = job.attrs
     const { loanModelId } = data
 
@@ -102,5 +102,5 @@ async function txFailure (error, instance) {
 }
 
 module.exports = {
-  defineLoanApproveJobs
+    defineLoanLiquidateJobs
 }

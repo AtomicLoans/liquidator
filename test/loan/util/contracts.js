@@ -9,6 +9,7 @@ schema.ctoken = require('../../../src/abi/ctoken')
 schema.erc20 = require('../../../src/abi/erc20')
 schema.medianizer = require('../../../src/abi/medianizer')
 schema.ondemandspv = require('../../../src/abi/ondemandspv')
+schema.exampledaicoin = require('../../../src/abi/exampledaicoin')
 
 function testLoadObject (type, address, chain, from) {
   if (from) {
