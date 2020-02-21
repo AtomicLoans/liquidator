@@ -1,14 +1,8 @@
-const { defineLoanRequestJobs } = require('./request')
-const { defineLoanLockJobs } = require('./lock')
-const { defineLoanApproveJobs } = require('./approve')
-const { defineLoanAcceptOrCancelJobs } = require('./acceptOrCancel')
+const { defineLoanLiquidateJobs } = require('./liquidate')
 const { defineLoanStatusJobs } = require('./status')
 
 function defineLoansJobs (agenda) {
-  defineLoanRequestJobs(agenda)
-  defineLoanLockJobs(agenda)
-  defineLoanApproveJobs(agenda)
-  defineLoanAcceptOrCancelJobs(agenda)
+  defineLoanLiquidateJobs(agenda)
   defineLoanStatusJobs(agenda)
 }
 

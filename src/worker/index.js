@@ -6,7 +6,6 @@ const agenda = new Agenda({ mongo: mongoose.connection, maxConcurrency: 1000, de
 
 const { getInterval } = require('../utils/intervals')
 
-const { defineSwapJobs } = require('./swap/index')
 const { defineLoanJobs } = require('./loan/index')
 
 const { RUN_SINGLE_PROCESS, WORKER_PORT, PORT, NODE_ENV, PARTY, HEROKU_APP } = process.env
@@ -21,14 +20,8 @@ async function start () {
   await agenda.every('2 minutes', 'update-market-data')
 
   await agenda.every(getInterval('CHECK_ALL_RECORDS_INTERVAL'), 'check-loan-statuses-and-update')
-  if (PARTY === 'arbiter') {
-    await agenda.every(getInterval('ARBITER_STATUS_INTERVAL'), 'check-arbiter-status')
-    await agenda.every(getInterval('LENDER_CHECK_INTERVAL'), 'check-lender-status')
-    await agenda.every(getInterval('ARBITER_ORACLE_INTERVAL'), 'check-arbiter-oracle')
-  } else {
-    // TODO: check every 30 seconds to changes to open loans and react
-    await agenda.now('notify-arbiter')
-  }
+
+  await agenda.every(getInterval('ARBITER_STATUS_INTERVAL'), 'check-liquidator-status')
 
   await agenda.every(getInterval('SANITIZE_TX_INTERVAL'), 'sanitize-eth-txs')
 
@@ -58,7 +51,6 @@ async function stop () {
   process.exit(0)
 }
 
-defineSwapJobs(agenda)
 defineLoanJobs(agenda)
 
 process.on('SIGTERM', stop)
