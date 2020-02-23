@@ -23,14 +23,14 @@ function defineAgentApproveJobs (agenda) {
     const { principalAddress } = await loanMarket.getAgentAddresses()
 
     const token = getObject('erc20', principal)
-    const fundsAddress = getContract('funds', principal)
+    const loansAddress = getContract('loans', principal)
 
-    const allowance = await token.methods.allowance(principalAddress, fundsAddress).call()
+    const allowance = await token.methods.allowance(principalAddress, loansAddress).call()
 
     console.log('allowance', allowance)
 
     if (parseInt(allowance) === 0) {
-      const txData = await token.methods.approve(fundsAddress, BN(2).pow(256).minus(1).toFixed()).encodeABI()
+      const txData = await token.methods.approve(loansAddress, BN(2).pow(256).minus(1).toFixed()).encodeABI()
       const approve = Approve.fromPrincipal({ principal })
       await approve.save()
       const ethTx = await setTxParams(txData, principalAddress, getContract('erc20', principal), approve)

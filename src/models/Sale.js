@@ -53,6 +53,9 @@ const SaleSchema = new mongoose.Schema({
   secretHashC: {
     type: String
   },
+  secretHashD: {
+    type: String
+  },
   saleToLoanIndex: {
     type: Number
   },
@@ -68,13 +71,20 @@ const SaleSchema = new mongoose.Schema({
     type: String,
     index: true
   },
+  refundTxHash: {
+    type: String,
+    index: true
+  },
+  settlementExpiration: {
+    type: Number
+  },
   latestCollateralBlock: {
     type: Number,
     index: true
   },
   status: {
     type: String,
-    enum: ['INITIATED', 'COLLATERAL_SENDING', 'COLLATERAL_SENT', 'SECRETS_PROVIDED', 'COLLATERAL_CLAIMED', 'ACCEPTING', 'ACCEPTED', 'CANCELLING', 'CANCELLED', 'FAILED'],
+    enum: ['INITIATED', 'COLLATERAL_SENDING', 'COLLATERAL_SENT', 'SECRETS_PROVIDED', 'COLLATERAL_CLAIMED', 'ACCEPTING', 'ACCEPTED', 'CANCELLING', 'CANCELLED', 'REFUNDING', 'REFUNDED', 'FAILED'],
     index: true,
     default: 'INITIATED'
   }

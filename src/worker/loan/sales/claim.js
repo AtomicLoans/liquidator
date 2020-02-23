@@ -1,79 +1,55 @@
 const axios = require('axios')
+const { sha256 } = require('@liquality/crypto')
+const compareVersions = require('compare-versions')
 const Sale = require('../../../models/Sale')
+const Loan = require('../../../models/Loan')
+const LoanMarket = require('../../../models/LoanMarket')
+const Secret = require('../../../models/Secret')
+const { numToBytes32 } = require('../../../utils/finance')
+const { getObject } = require('../../../utils/contracts')
+const { getInterval } = require('../../../utils/intervals')
+const { getLockArgs } = require('../utils/collateral')
+const { getInitArgs } = require('../utils/collateralSwap')
+const { isArbiter } = require('../../../utils/env')
+const { getEndpoint } = require('../../../utils/endpoints')
 const handleError = require('../../../utils/handleError')
+const { remove0x } = require('@liquality/ethereum-utils')
 
 function defineSalesClaimJobs (agenda) {
-  agenda.define('verify-collateral-claim', async (job, done) => {
-    // THIS JOB IS ONLY DONE BY THE LENDER AGENT
+  agenda.define('claim-collateral', async (job, done) => {
 
-    console.log('verify-collateral-claim')
+    try {
+      const { data } = job.attrs
+      const { saleModelId } = data
 
-    const { data } = job.attrs
-    const { saleModelId } = data
-    const { NETWORK } = process.env
+      const sale = await Sale.findOne({ _id: saleModelId }).exec()
+      const { principal, collateral, secretB, secretC, secretHashD, initTxHash, saleId } = sale
 
-    const sale = await Sale.findOne({ _id: saleModelId }).exec()
-    if (!sale) return console.log('Error: Sale not found')
-    const { initTxHash } = sale
+      const loanMarket = await LoanMarket.findOne({ principal, collateral }).exec()
 
-    console.log('initTxHash', initTxHash)
+      const loan = await Loan.findOne({ _id: sale.loan }).exec()
+      const { loanId } = loan
 
-    if (NETWORK === 'mainnet' || NETWORK === 'kovan') {
-      let baseUrl
-      if (NETWORK === 'mainnet') {
-        baseUrl = 'https://blockstream.info'
-      } else {
-        baseUrl = 'https://blockstream.info/testnet'
-      }
-      try {
-        console.log(`${baseUrl}/api/tx/${initTxHash}/outspend/0`)
-        const { status, data: spendInfo } = await axios.get(`${baseUrl}/api/tx/${initTxHash}/outspend/0`)
+      const swapParams = await getInitArgs(numToBytes32(loanId), numToBytes32(saleId), principal, collateral)
 
-        if (status === 200) {
-          if (spendInfo.spent === true) {
-            console.log('COLLATERAL_CLAIMED FOUND')
-            sale.claimTxHash = spendInfo.txid
-            sale.status = 'COLLATERAL_CLAIMED'
-          }
-        }
-      } catch (e) {
-        handleError(e)
-      }
-    } else {
-      const collateralBlockHeight = await sale.collateralClient().chain.getBlockHeight()
-      const { latestCollateralBlock } = sale
-      let curBlock = latestCollateralBlock + 1
+      const secretModel = await Secret.findOne({ secretHash: remove0x(secretHashD) }).exec()
+      const { secret: secretD } = secretModel
 
-      while (curBlock <= collateralBlockHeight) {
-        const block = await sale.collateralClient().chain.getBlockByNumber(curBlock)
-        const txs = await Promise.all(block.transactions.map((txid) => {
-          return sale.collateralClient().getMethod('getTransactionByHash')(txid)
-        }))
+      const secrets = [remove0x(secretB), remove0x(secretC), secretD]
 
-        for (let i = 0; i < txs.length; i++) {
-          const tx = txs[i]
-          const vins = tx._raw.vin
-          for (let j = 0; j < vins.length; j++) {
-            const vin = vins[j]
-            if (vin.txid === initTxHash) {
-              console.log('COLLATERAL_CLAIMED FOUND')
-              sale.claimTxHash = tx.hash
-              sale.status = 'COLLATERAL_CLAIMED'
-              curBlock = collateralBlockHeight + 1
-              break
-            }
-          }
-        }
+      const { collateralPublicKey: liquidatorPubKey } = await loanMarket.getAgentAddresses()
 
-        curBlock++
-      }
+      let pubKeys = swapParams[0]
+      pubKeys.liquidatorPubKey = liquidatorPubKey
 
-      sale.latestCollateralBlock = collateralBlockHeight
+      const claimTxHash = await sale.collateralClient().loan.collateralSwap.claim(initTxHash, swapParams[0], secrets, swapParams[1], swapParams[2])
+      console.log('claimTxHash', claimTxHash)
+    } catch(e) {
+      console.log('e', e)
     }
 
-    await sale.save()
-
     done()
+
   })
 }
 

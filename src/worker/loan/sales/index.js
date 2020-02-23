@@ -1,11 +1,11 @@
 const { defineSalesInitJobs } = require('./init')
 const { defineSalesClaimJobs } = require('./claim')
-const { defineSalesAcceptJobs } = require('./accept')
+const { defineSaleRefundJobs } = require('./refund')
 
 function defineSalesJobs (agenda) {
   defineSalesInitJobs(agenda)
   defineSalesClaimJobs(agenda)
-  defineSalesAcceptJobs(agenda)
+  defineSaleRefundJobs(agenda)
 }
 
 module.exports = {
