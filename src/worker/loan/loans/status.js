@@ -93,7 +93,7 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
       console.log('collateralValue', collateralValue)
 
       const minCollateralValueInUnits = await loans.methods.minCollateralValue(numToBytes32(loanId)).call()
-      const minCollateralValue = BN(minCollateralValueInUnits).dividedBy(currencies[principal].multiplier).toFixed()
+      const minCollateralValue = fromWei(minCollateralValueInUnits, 'ether')
       console.log('minCollateralValue', minCollateralValue)
 
       if (BN(collateralValue).isLessThan(minCollateralValue)) {
