@@ -44,7 +44,6 @@ function defineLiquidatorLoanJobs (agenda) {
     let currentIndex = loanMarket.loanIndex + 1
 
     while (currentIndex <= loanIndex) {
-      console.log('test-update-loans-inside')
       const [loans, bools, approveExpiration, acceptExpiration] = await Promise.all([
         loansContract.methods.loans(numToBytes32(currentIndex)).call(),
         loansContract.methods.bools(numToBytes32(currentIndex)).call(),
@@ -53,7 +52,7 @@ function defineLiquidatorLoanJobs (agenda) {
       ])
 
       const { approved, withdrawn, sale, paid, off } = bools
-      const { loanExpiration, arbiter, borrower } = loans
+      const { loanExpiration, arbiter, borrower, lender } = loans
 
       const currentTime = await getCurrentTime()
 
@@ -117,6 +116,7 @@ function defineLiquidatorLoanJobs (agenda) {
         const amounts = await getCollateralAmounts(numToBytes32(currentIndex), loan, rate)
         loan.setCollateralAddressValues(addresses, amounts)
         loan.borrowerPrincipalAddress = borrower
+        loan.lenderPrincipalAddress = lender
         loan.loanExpiration = loanExpiration
 
         await loan.save()

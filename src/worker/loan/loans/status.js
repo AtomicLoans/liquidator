@@ -3,6 +3,7 @@ const BN = require('bignumber.js')
 const { remove0x } = require('@liquality/ethereum-utils')
 const { sha256 } = require('@liquality/crypto')
 const compareVersions = require('compare-versions')
+const median = require('median')
 const Agent = require('../../../models/Agent')
 const Approve = require('../../../models/Approve')
 const Fund = require('../../../models/Fund')
@@ -17,6 +18,7 @@ const { getObject, getContract } = require('../../../utils/contracts')
 const { getInterval } = require('../../../utils/intervals')
 const { isArbiter } = require('../../../utils/env')
 const { currencies } = require('../../../utils/fx')
+const { BlockchainInfo, CoinMarketCap, CryptoCompare, Gemini, BitBay, Bitstamp, Coinbase, CryptoWatch, Coinpaprika, Kraken } = require('../../../utils/getPrices')
 const { getEndpoint } = require('../../../utils/endpoints')
 const { getLockArgs, getCollateralAmounts, isCollateralRequirementsSatisfied } = require('../utils/collateral')
 const getMailer = require('../utils/mailer')
@@ -24,6 +26,10 @@ const handleError = require('../../../utils/handleError')
 
 const web3 = require('../../../utils/web3')
 const { hexToNumber, fromWei } = web3().utils
+
+const apis = [
+  BlockchainInfo, Gemini, BitBay, Bitstamp, Coinbase, CryptoWatch, Coinpaprika, Kraken
+]
 
 function defineLoanStatusJobs (agenda) {
   const mailer = getMailer(agenda)
@@ -40,56 +46,10 @@ function defineLoanStatusJobs (agenda) {
         const ethBalance = await web3().eth.getBalance(principalAddress)
 
         if (ethBalance > 0) {
+          const medianBtcPrice = await getMedianBtcPrice()
           await approveTokens(loanMarket, agenda)
-
-          const { principal } = loanMarket
-
-          const loans = getObject('loans', principal)
-          const token = getObject('erc20', principal)
-
-          const loanCount = await loans.methods.loanIndex().call()
-
-          const loanModels = await Loan.find({ principal, status: { $nin: ['QUOTE', 'REQUESTING', 'CANCELLING', 'CANCELLED', 'ACCEPTING', 'ACCEPTED', 'LIQUIDATED', 'FAILED'] } })
-
-          for (let i = 0; i < loanModels.length; i++) {
-            const loanModel = loanModels[i]
-
-            const { loanId, collateralRefundableP2SHAddress, collateralSeizableP2SHAddress } = loanModel
-
-            const { off, sale } = await loans.methods.bools(numToBytes32(loanId)).call()
-
-            if (!off && !sale) {
-
-              const collateralBalance = await loanModel.collateralClient().chain.getBalance([collateralRefundableP2SHAddress, collateralSeizableP2SHAddress])
-
-              console.log('collateralBalance', BN(collateralBalance).toFixed())
-
-            } else {
-              loanModel.status = 'ACCEPTED'
-              await loanModel.save()
-            }
-          }
-
-          // for (let i = 0; i < loanCount; i++) {
-          //   const { off, sale } = await loans.methods.bools(numToBytes32(i)).call()
-
-          //   if (!off && !sale) {
-          //     const safe = await loans.methods.safe(numToBytes32(i)).call()
-
-          //     if (!safe) {
-          //       const discountBuy = await loans.methods.discountCollateralValue(numToBytes32(i)).call()
-
-          //       const balance = await token.methods.balanceOf(principalAddress).call()
-
-          //       if (BN(balance).isGreaterThanOrEqualTo(discountBuy)) {
-          //         // liquidate
-          //         console.log('balance is enough to liquidate')
-
-          //         // agenda.now('liquidate', { loanId: i })
-          //       }
-          //     }
-          //   }
-          // }
+          await checkLoans(loanMarket, agenda, medianBtcPrice)
+          await checkSales(loanMarket, agenda, medianBtcPrice)
         }
       }
 
@@ -103,145 +63,179 @@ function defineLoanStatusJobs (agenda) {
   })
 }
 
-async function repopulateLoans (loanMarket, principal, principalAddress, collateral, lenderLoanCount, loans, sales) {
-  console.log('Repopulate Loans')
-  const decimals = currencies[principal].decimals
-  const multiplier = currencies[principal].multiplier
-  for (let i = 0; i < lenderLoanCount; i++) {
-    const loanIdBytes32 = await loans.methods.lenderLoans(principalAddress, i).call()
-    const loanId = hexToNumber(loanIdBytes32)
+async function getMedianBtcPrice () {
+  let btcPrices = []
+  for (let i = 0; i < apis.length; i++) {
+    const btcPrice = await apis[i]()
+    btcPrices.push(parseFloat(btcPrice))
+  }
+  return median(btcPrices)
+}
 
-    const { borrower, principal: principalAmount, createdAt, loanExpiration, requestTimestamp } = await loans.methods.loans(numToBytes32(loanId)).call()
-    const collateralAmount = await loans.methods.collateral(numToBytes32(loanId)).call()
-    const minCollateralAmount = BN(collateralAmount).dividedBy(currencies[collateral].multiplier).toFixed(currencies[collateral].decimals)
+async function checkLoans (loanMarket, agenda, medianBtcPrice) {
+  const { principal, collateral } = loanMarket
 
-    const params = { principal, collateral, principalAmount: BN(principalAmount).dividedBy(multiplier).toFixed(decimals), requestLoanDuration: loanExpiration - createdAt }
+  const loans = getObject('loans', principal)
 
-    const loanExists = await Loan.findOne({ principal, loanId }).exec()
+  const loanModels = await Loan.find({ principal, status: { $nin: ['QUOTE', 'REQUESTING', 'CANCELLING', 'CANCELLED', 'ACCEPTING', 'ACCEPTED', 'LIQUIDATING', 'LIQUIDATED', 'FAILED'] } }).exec()
 
-    if (!loanExists) {
-      await repopulateLoan(loanMarket, params, minCollateralAmount, loanId, requestTimestamp, loans, borrower, collateral, principal, sales)
+  for (let i = 0; i < loanModels.length; i++) {
+    const loanModel = loanModels[i]
+
+    const { loanId, collateralRefundableP2SHAddress, collateralSeizableP2SHAddress } = loanModel
+
+    const { off, sale } = await loans.methods.bools(numToBytes32(loanId)).call()
+
+    if (!off && !sale) {
+
+      const collateralBalance = await loanModel.collateralClient().chain.getBalance([collateralRefundableP2SHAddress, collateralSeizableP2SHAddress])
+
+      const collateralValue = BN(collateralBalance).dividedBy(currencies[collateral].multiplier).times(medianBtcPrice).toFixed()
+      console.log('collateralValue', collateralValue)
+
+      const minCollateralValueInUnits = await loans.methods.minCollateralValue(numToBytes32(loanId)).call()
+      const minCollateralValue = BN(minCollateralValueInUnits).dividedBy(currencies[principal].multiplier).toFixed()
+      console.log('minCollateralValue', minCollateralValue)
+
+      if (BN(collateralValue).isLessThan(minCollateralValue)) {
+        console.log('LIQUIDATE')
+
+        const safe = await loans.methods.safe(numToBytes32(loanId)).call()
+
+        if (safe) {
+          // update oracles
+
+          agenda.now('check-liquidator-oracle')
+        } else {
+          loanModel.status = 'LIQUIDATING'
+          await loanModel.save()
+
+          agenda.now('liquidate-loan', { loanModelId: loanModel.id })
+        }
+      }
+    } else if (sale) {
+      // TODO: CHECK IF FIRST LIQUIDATION FAILED
+    } else {
+      loanModel.status = 'ACCEPTED'
+      await loanModel.save()
     }
   }
 }
 
-async function repopulateLoan (loanMarket, params, minCollateralAmount, loanId, requestTimestamp, loans, borrower, collateral, principal, sales) {
-  const loan = Loan.fromLoanMarket(loanMarket, params, minCollateralAmount)
-  loan.loanId = loanId
-  loan.requestCreatedAt = requestTimestamp
+async function checkSales (loanMarket, agenda, medianBtcPrice) {
+  const { principal, collateral } = loanMarket
 
-  await loan.setAgentAddresses()
-  const { borrowerPubKey, lenderPubKey } = await loans.methods.pubKeys(numToBytes32(loanId)).call()
+  const sales = getObject('sales', principal)
 
-  loan.borrowerPrincipalAddress = borrower
-  loan.borrowerCollateralPublicKey = remove0x(borrowerPubKey)
-  loan.lenderCollateralPublicKey = remove0x(lenderPubKey)
+  await Sale.remove({ saleId: 3 }).exec()
 
-  await loan.setSecretHashes(minCollateralAmount)
-  const market = await Market.findOne({ from: collateral, to: principal }).exec()
-  const { rate } = market
-  const lockArgs = await getLockArgs(numToBytes32(loanId), principal, collateral)
-  const addresses = await loan.collateralClient().loan.collateral.getLockAddresses(...lockArgs)
-  const amounts = await getCollateralAmounts(numToBytes32(loanId), loan, rate)
+  const saleModels = await Sale.find({ principal, status: { $in: ['INITIATED', 'COLLATERAL_SENDING', 'COLLATERAL_SENT'] } }).exec()
 
-  loan.setCollateralAddressValues(addresses, amounts)
-  const { approved, withdrawn, sale, paid, off } = await loans.methods.bools(numToBytes32(loanId)).call()
-  let saleModel
-  if (off && withdrawn) {
-    loan.status = 'ACCEPTED'
-  } else if (off && !withdrawn) {
-    loan.status = 'CANCELLED'
-  } else if (sale) {
-    loan.status = 'WITHDRAWN'
-    // TODO: add Sale records
-    const next = await sales.methods.next(numToBytes32(loanId)).call()
-    const saleIndexByLoan = next - 1
-    const saleIdBytes32 = await sales.methods.saleIndexByLoan(numToBytes32(loanId), saleIndexByLoan).call()
-    const saleId = hexToNumber(saleIdBytes32)
-    let safePrincipal = principal
-    if (principal === 'SAI') {
-      const { data: versionData } = await axios.get(`${getEndpoint('ARBITER_ENDPOINT')}/version`)
-      const { version } = versionData
-      if (!compareVersions(version, '0.1.31', '>')) {
-        safePrincipal = 'DAI'
-      }
-    }
-    const { data: arbiterSale } = await axios.get(`${getEndpoint('ARBITER_ENDPOINT')}/sales/contract/${safePrincipal}/${saleId}`)
-    saleModel = new Sale(arbiterSale)
-    const { collateralRefundableP2SHAddress, collateralSeizableP2SHAddress } = loan
-    const { NETWORK } = process.env
-    if (NETWORK === 'mainnet' || NETWORK === 'kovan') {
-      let baseUrl
-      if (NETWORK === 'mainnet') {
-        baseUrl = 'https://blockstream.info'
-      } else {
-        baseUrl = 'https://blockstream.info/testnet'
-      }
-      try {
-        console.log(`${baseUrl}/api/addresss/${collateralRefundableP2SHAddress}`)
-        const { status, data: refundableAddressInfo } = await axios.get(`${baseUrl}/api/addresss/${collateralRefundableP2SHAddress}`)
-        const { data: seizableAddressInfo } = await axios.get(`${baseUrl}/api/addresss/${collateralSeizableP2SHAddress}`)
-        if (status === 200) {
-          const { chain_stats: refChainStats } = refundableAddressInfo
-          const { chain_stats: sezChainStats } = seizableAddressInfo
-          if (refChainStats.funded_txo_sum > 0 && sezChainStats.funded_txo_sum > 0) {
-            const refDif = refChainStats.funded_txo_sum - refChainStats.spent_txo_sum
-            const sezDif = sezChainStats.funded_txo_sum - sezChainStats.spent_txo_sum
-            if (refDif === 0 && sezDif === 0) {
-              const secret = loan.lenderSecrets[1]
-              if (sha256(secret) === sale.secretHashB) {
-                console.log('LENDER SECRET MATCHES')
-                sale.secretB = secret
-                sale.status = 'SECRETS_PROVIDED'
-              }
-            }
+  const currentTime = await getCurrentTime()
+
+  for (let i = 0; i < saleModels.length; i++) {
+    const saleModel = saleModels[i]
+
+    const { saleId, collateralSwapRefundableP2SHAddress, collateralSwapSeizableP2SHAddress, settlementExpiration } = saleModel
+
+    if (currentTime > settlementExpiration) {
+      console.log('SHOULD REFUND')
+
+      agenda.now('refund-sale', { saleModelId: saleModel.id })
+    } else {
+      const collateralSwapBalance = await saleModel.collateralClient().chain.getBalance([collateralSwapRefundableP2SHAddress, collateralSwapSeizableP2SHAddress])
+
+      console.log('saleId', saleId)
+      console.log('collateralSwapBalance', BN(collateralSwapBalance).toFixed())
+
+      const discountBuyInUnits = await sales.methods.discountBuy(numToBytes32(saleId)).call()
+      const discountBuy = BN(discountBuyInUnits).dividedBy(currencies[principal].multiplier).toFixed()
+      console.log('discountBuy', discountBuy)
+
+      const collateralValue = BN(collateralSwapBalance).dividedBy(currencies[collateral].multiplier).times(medianBtcPrice).toFixed()
+      console.log('collateralValue', collateralValue)
+
+      if (BN(collateralValue).isGreaterThan(discountBuy)) {
+        console.log('SHOULD CLAIM COLLATERAL')
+
+        if (process.env.NODE_ENV === 'test') {
+          const initUtxos = await saleModel.collateralClient().getMethod('jsonrpc')('listunspent', 1, 999999, [collateralSwapRefundableP2SHAddress])
+          const initUtxo = initUtxos[0]
+          const { txid: initTxHash } = initUtxo
+
+          const { secretB, secretC } = await sales.methods.secretHashes(numToBytes32(saleId)).call()
+
+          console.log('initTxHash', initTxHash)
+          console.log('secretB', secretB)
+          console.log('secretC', secretC)
+
+          saleModel.secretB = secretB
+          saleModel.secretC = secretC
+          saleModel.initTxHash = initTxHash
+          saleModel.status = 'SECRETS_PROVIDED'
+
+          await saleModel.save()
+
+          agenda.now('claim-collateral', { saleModelId: saleModel.id })
+        } else {
+          // check arbiter / lender agent endpoint
+
+          const { data: unfilteredAgents } = await axios.get(
+            `${getEndpoint('ARBITER_ENDPOINT')}/agents`
+          );
+      
+          const agents = unfilteredAgents.filter(
+            agent => agent.principalAddress === ensure0x(saleModel.loan.lenderPrincipalAddress) && agent.status === 'ACTIVE',
+          );
+          const lenderUrl = agents[0].url;
+      
+          const {
+            data: { secretB },
+          } = await axios.get(`${lenderUrl}/sales/contract/${principal}/${saleId}`);
+          console.log(`${lenderUrl}/sales/contract/${principal}/${saleId}`);
+          const {
+            data: { secretC, initTxHash },
+          } = await axios.get(
+            `${getEndpoint('ARBITER_ENDPOINT')}/sales/contract/${principal}/${saleId}`,
+          );
+          console.log(`${getEndpoint('ARBITER_ENDPOINT')}/sales/contract/${principal}/${saleId}`)
+
+          console.log('initTxHash', initTxHash)
+          console.log('secretB', secretB)
+          console.log('secretC', secretC)
+
+          if (secretB && secretC && initTxHash) {
+            saleModel.secretB = secretB
+            saleModel.secretC = secretC
+            saleModel.initTxHash = initTxHash
+            saleModel.status = 'SECRETS_PROVIDED'
+
+            await saleModel.save()
+
+            agenda.now('claim-collateral', { saleModelId: saleModel.id })
+          } else {
+            saleModel.status = 'COLLATERAL_SENT'
+
+            await saleModel.save()
           }
         }
-      } catch (e) {
-        handleError(e)
       }
     }
-    const { accepted } = await sales.methods.sales(numToBytes32(saleId)).call()
-    if (accepted) {
-      saleModel.status = 'ACCEPTED'
-      loan.status = 'LIQUIDATED'
-    }
-  } else if (paid) {
-    loan.status = 'REPAID'
-  } else if (withdrawn) {
-    loan.status = 'WITHDRAWN'
-  } else if (approved) {
-    loan.status = 'APPROVED'
-  } else {
-    loan.status = 'AWAITING_COLLATERAL'
-  }
-  await loan.save()
-  if (saleModel) {
-    saleModel.loanModelId = loan.id
-    await saleModel.save()
   }
 }
-
 
 async function approveTokens (loanMarket, agenda) {
   const { principalAddress } = await loanMarket.getAgentAddresses()
   const { principal } = loanMarket
 
   const token = getObject('erc20', principal)
-  const fundsAddress = getContract('funds', principal)
+  const loansAddress = getContract('loans', principal)
 
-  const allowance = await token.methods.allowance(principalAddress, fundsAddress).call()
+  const allowance = await token.methods.allowance(principalAddress, loansAddress).call()
   const approve = await Approve.findOne({ principal, status: { $nin: ['FAILED'] } }).exec()
 
   if (parseInt(allowance) === 0 || !approve) {
     await agenda.schedule(getInterval('ACTION_INTERVAL'), 'approve-tokens', { loanMarketModelId: loanMarket.id })
-  } else {
-    const fundModels = await Fund.find({ status: 'WAITING_FOR_APPROVE', principal }).exec()
-
-    if (fundModels.length > 0) {
-      const fund = fundModels[0]
-      await agenda.schedule(getInterval('ACTION_INTERVAL'), 'create-fund-ish', { fundModelId: fund.id })
-    }
   }
 }
 

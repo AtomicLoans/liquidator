@@ -44,7 +44,7 @@ const BTC_TO_SAT = 10 ** 8
 
 let borpubk, lendpubk, arbiterpubk 
 
-function testLiquidation (web3Chain, ethNode, btcChain) {
+function testRefund (web3Chain, ethNode, btcChain) {
   describe('Liquidation Tests', () => {
     it('should POST loanMarket details and return loan details', async () => {
       const loanReq = 25; // 25 DAI
@@ -203,57 +203,63 @@ function testLiquidation (web3Chain, ethNode, btcChain) {
 
       const saleId = saleIndexAfter
 
-      console.log('saleIndexBefore', saleIndexBefore)
-      console.log('saleIndexAfter', saleIndexAfter)
+      const settlementExpiration = await lenderSales.methods.settlementExpiration(numToBytes32(saleId)).call()
 
-      const swapSecretHashes = await getSwapSecretHashes(lenderSales, numToBytes32(saleId))
-      console.log('swapSecretHashes', swapSecretHashes)
+      const currentTime = Math.floor(new Date().getTime() / 1000)
 
-      const { collateralPublicKey: liquidatorPubKey } = await getAgentAddresses(liquidatorServer)
-      const liquidatorPubKeyHash = hash160(liquidatorPubKey)
+      await increaseTime(parseInt(settlementExpiration - currentTime) + 1000)
 
-      let swapPubKeys = lockParams[1]
-      swapPubKeys.liquidatorPubKey = liquidatorPubKey
-      swapPubKeys.liquidatorPubKeyHash = liquidatorPubKeyHash
+    //   console.log('saleIndexBefore', saleIndexBefore)
+    //   console.log('saleIndexAfter', saleIndexAfter)
 
-      const swapExpiration = await lenderSales.methods.swapExpiration(numToBytes32(saleId)).call()
-      const liquidationExpiration = await lenderLoans.methods.liquidationExpiration(numToBytes32(loanId)).call()
+    //   const swapSecretHashes = await getSwapSecretHashes(lenderSales, numToBytes32(saleId))
+    //   console.log('swapSecretHashes', swapSecretHashes)
 
-      const swapExpirations = { swapExpiration, liquidationExpiration }
+    //   const { collateralPublicKey: liquidatorPubKey } = await getAgentAddresses(liquidatorServer)
+    //   const liquidatorPubKeyHash = hash160(liquidatorPubKey)
 
-      const swapParams = [swapPubKeys, swapSecretHashes, swapExpirations]
-      console.log('swapParams', swapParams)
-      const lockSwapAddresses = await borrowerBtcChain.client.loan.collateralSwap.getInitAddresses(...swapParams)
+    //   let swapPubKeys = lockParams[1]
+    //   swapPubKeys.liquidatorPubKey = liquidatorPubKey
+    //   swapPubKeys.liquidatorPubKeyHash = liquidatorPubKeyHash
 
-      console.log('lockSwapAddresses', lockSwapAddresses)
+    //   const swapExpiration = await lenderSales.methods.swapExpiration(numToBytes32(saleId)).call()
+    //   const liquidationExpiration = await lenderLoans.methods.liquidationExpiration(numToBytes32(loanId)).call()
 
-      // const swapParams = [colParams.pubKeys, swapSecretHashes, colParams.expirations]
-      // const lockAddresses = await bitcoin.client.loan.collateralSwap.getInitAddresses(...swapParams)
+    //   const swapExpirations = { swapExpiration, liquidationExpiration }
 
-      await importBitcoinAddressesByAddress([lockSwapAddresses.refundableAddress, lockSwapAddresses.seizableAddress])
+    //   const swapParams = [swapPubKeys, swapSecretHashes, swapExpirations]
+    //   console.log('swapParams', swapParams)
+    //   const lockSwapAddresses = await borrowerBtcChain.client.loan.collateralSwap.getInitAddresses(...swapParams)
 
-      const outputs = [{ address: lockSwapAddresses.refundableAddress }, { address: lockSwapAddresses.seizableAddress }]
+    //   console.log('lockSwapAddresses', lockSwapAddresses)
 
-      const multisigBorrowerParams = [lockTxHash, lockParams[1], lockParams[2], lockParams[3], 'borrower', outputs]
-      const borrowerSigs = await borrowerBtcChain.client.loan.collateral.multisigSign(...multisigBorrowerParams)
+    //   // const swapParams = [colParams.pubKeys, swapSecretHashes, colParams.expirations]
+    //   // const lockAddresses = await bitcoin.client.loan.collateralSwap.getInitAddresses(...swapParams)
 
-      console.log('borrowerSigs', borrowerSigs)
+    //   await importBitcoinAddressesByAddress([lockSwapAddresses.refundableAddress, lockSwapAddresses.seizableAddress])
 
-      const multisigLenderParams = [lockTxHash, lockParams[1], lockParams[2], lockParams[3], 'lender', outputs]
-      const lenderSigs = await lenderBtcChain.client.loan.collateral.multisigSign(...multisigLenderParams)
+    //   const outputs = [{ address: lockSwapAddresses.refundableAddress }, { address: lockSwapAddresses.seizableAddress }]
 
-      const sigs = {
-        refundable: [Buffer.from(borrowerSigs.refundableSig, 'hex'), Buffer.from(lenderSigs.refundableSig, 'hex')],
-        seizable: [Buffer.from(borrowerSigs.seizableSig, 'hex'), Buffer.from(lenderSigs.seizableSig, 'hex')]
-      }
+    //   const multisigBorrowerParams = [lockTxHash, lockParams[1], lockParams[2], lockParams[3], 'borrower', outputs]
+    //   const borrowerSigs = await borrowerBtcChain.client.loan.collateral.multisigSign(...multisigBorrowerParams)
 
-      const multisigSendTxHash = await borrowerBtcChain.client.loan.collateral.multisigSend(lockTxHash, sigs, lockParams[1], lockParams[2], lockParams[3], outputs)
-      console.log('multisigSendTxHash', multisigSendTxHash)
+    //   console.log('borrowerSigs', borrowerSigs)
 
-      await chains.bitcoinWithNode.client.chain.generateBlock(1)
+    //   const multisigLenderParams = [lockTxHash, lockParams[1], lockParams[2], lockParams[3], 'lender', outputs]
+    //   const lenderSigs = await lenderBtcChain.client.loan.collateral.multisigSign(...multisigLenderParams)
 
-      await arbiterSales.methods.provideSecret(numToBytes32(saleId), arbiterSecs[1]).send({ gas: 2000000 })
-      await lenderSales.methods.provideSecret(numToBytes32(saleId), lendSecs[1]).send({ gas: 2000000 })
+    //   const sigs = {
+    //     refundable: [Buffer.from(borrowerSigs.refundableSig, 'hex'), Buffer.from(lenderSigs.refundableSig, 'hex')],
+    //     seizable: [Buffer.from(borrowerSigs.seizableSig, 'hex'), Buffer.from(lenderSigs.seizableSig, 'hex')]
+    //   }
+
+    //   const multisigSendTxHash = await borrowerBtcChain.client.loan.collateral.multisigSend(lockTxHash, sigs, lockParams[1], lockParams[2], lockParams[3], outputs)
+    //   console.log('multisigSendTxHash', multisigSendTxHash)
+
+    //   await chains.bitcoinWithNode.client.chain.generateBlock(1)
+
+    //   await arbiterSales.methods.provideSecret(numToBytes32(saleId), arbiterSecs[1]).send({ gas: 2000000 })
+    //   await lenderSales.methods.provideSecret(numToBytes32(saleId), lendSecs[1]).send({ gas: 2000000 })
     })
   })
 }
@@ -322,7 +328,7 @@ describe('Lender Agent - Funds', () => {
     // after(function () {
     //   testAfterArbiter()
     // })
-    testLiquidation(chains.web3WithHDWallet, chains.ethereumWithNode, chains.bitcoinWithJs)
+    testRefund(chains.web3WithHDWallet, chains.ethereumWithNode, chains.bitcoinWithJs)
   })
 
   if (!isCI) {
