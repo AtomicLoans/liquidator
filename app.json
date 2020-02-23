@@ -1,7 +1,7 @@
 {
-  "name": "Atomic Agent",
-  "description": "Lending on autopilot",
-  "repository": "https://github.com/atomicloans/atomicagent",
+  "name": "Liquidator Agent",
+  "description": "Liquidations on autopilot",
+  "repository": "https://github.com/atomicloans/liquidator",
   "logo": "https://raw.githubusercontent.com/AtomicLoans/agent/dev/atomic-loans.png",
   "keywords": ["atomic loans", "loans", "ethereum", "bitcoin", "cryptocurrency"],
   "addons": ["mongolab:sandbox"],
