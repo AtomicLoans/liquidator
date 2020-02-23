@@ -47,30 +47,30 @@ let borpubk, lendpubk, arbiterpubk
 function testLiquidation (web3Chain, ethNode, btcChain) {
   describe('Liquidation Tests', () => {
     it('should POST loanMarket details and return loan details', async () => {
-      const loanReq = 25; // 25 DAI
-      const loanRat = 2; // Collateralization ratio of 200%
-      let col;
+      const loanReq = 25 // 25 DAI
+      const loanRat = 2 // Collateralization ratio of 200%
+      let col
 
-      let arbiterSecs = []
-      let arbiterSechs = []
+      const arbiterSecs = []
+      const arbiterSechs = []
       for (let i = 0; i < 4; i++) {
-        let sec = sha256(Math.random().toString())
+        const sec = sha256(Math.random().toString())
         arbiterSecs.push(ensure0x(sec))
         arbiterSechs.push(ensure0x(sha256(sec)))
       }
 
-      let lendSecs = []
-      let lendSechs = []
+      const lendSecs = []
+      const lendSechs = []
       for (let i = 0; i < 4; i++) {
-        let sec = sha256(Math.random().toString())
+        const sec = sha256(Math.random().toString())
         lendSecs.push(ensure0x(sec))
         lendSechs.push(ensure0x(sha256(sec)))
       }
 
-      let borSecs = []
-      let borSechs = []
+      const borSecs = []
+      const borSechs = []
       for (let i = 0; i < 4; i++) {
-        let sec = sha256(Math.random().toString())
+        const sec = sha256(Math.random().toString())
         borSecs.push(ensure0x(sec))
         borSechs.push(ensure0x(sha256(sec)))
       }
@@ -107,8 +107,8 @@ function testLiquidation (web3Chain, ethNode, btcChain) {
       const fundParams = [
         toWei('1', unit),
         toWei('100', unit),
-        toSecs({days: 1}),
-        toSecs({days: 366}),
+        toSecs({ days: 1 }),
+        toSecs({ days: 366 }),
         YEAR_IN_SECONDS.times(2).plus(Math.floor(Date.now() / 1000)).toFixed(),
         toWei('1.5', 'gether'), // 150% collateralization ratio
         toWei(rateToSec('16.5'), 'gether'), // 16.50%
@@ -145,9 +145,9 @@ function testLiquidation (web3Chain, ethNode, btcChain) {
         borrower,
         toWei(loanReq.toString(), unit),
         col,
-        toSecs({days: 2}),
+        toSecs({ days: 2 }),
         ~~(Date.now() / 1000),
-        [ ...borSechs, ...lendSechs ],
+        [...borSechs, ...lendSechs],
         ensure0x(borpubk),
         ensure0x(lendpubk)
       ]
@@ -212,7 +212,7 @@ function testLiquidation (web3Chain, ethNode, btcChain) {
       const { collateralPublicKey: liquidatorPubKey } = await getAgentAddresses(liquidatorServer)
       const liquidatorPubKeyHash = hash160(liquidatorPubKey)
 
-      let swapPubKeys = lockParams[1]
+      const swapPubKeys = lockParams[1]
       swapPubKeys.liquidatorPubKey = liquidatorPubKey
       swapPubKeys.liquidatorPubKeyHash = liquidatorPubKeyHash
 
@@ -273,8 +273,8 @@ async function checkLoanLiquidated (loanId, principal) {
   }
 }
 
-async function getSwapSecretHashes(contract, instance) {
-  let { secretHashA, secretHashB, secretHashC, secretHashD } = await contract.methods.secretHashes(instance).call()
+async function getSwapSecretHashes (contract, instance) {
+  const { secretHashA, secretHashB, secretHashC, secretHashD } = await contract.methods.secretHashes(instance).call()
   secretHashA1 = remove0x(secretHashA)
   secretHashB1 = remove0x(secretHashB)
   secretHashC1 = remove0x(secretHashC)

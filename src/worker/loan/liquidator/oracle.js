@@ -32,9 +32,9 @@ function defineOracleJobs (agenda) {
 
     const med = getObject('medianizer')
 
-    let arr = Array.apply(0,new Array(numOracles)).map(function(_,i){ return i })
+    let arr = Array.apply(0, new Array(numOracles)).map(function (_, i) { return i })
     for (let k = 0; k < numOracles; k++) {
-        arr = arr.sort(function(a,b){ return Math.random()>0.5 });
+      arr = arr.sort(function (a, b) { return Math.random() > 0.5 })
     }
 
     if (NETWORK === 'mainnet') {

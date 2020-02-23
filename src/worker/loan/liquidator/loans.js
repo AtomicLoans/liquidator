@@ -32,7 +32,7 @@ function defineLiquidatorLoanJobs (agenda) {
     if (!loanMarket) return console.log('Error: LoanMarket not found')
 
     const { principal, collateral } = loanMarket
-    const { principalAddress: principalAddress } = await loanMarket.getAgentAddresses()
+    const { principalAddress } = await loanMarket.getAgentAddresses()
 
     const market = await Market.findOne({ from: collateral, to: principal }).exec()
     if (!market) return console.log('Error: Market not found')

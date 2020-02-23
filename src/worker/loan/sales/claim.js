@@ -17,7 +17,6 @@ const { remove0x } = require('@liquality/ethereum-utils')
 
 function defineSalesClaimJobs (agenda) {
   agenda.define('claim-collateral', async (job, done) => {
-
     try {
       const { data } = job.attrs
       const { saleModelId } = data
@@ -39,17 +38,16 @@ function defineSalesClaimJobs (agenda) {
 
       const { collateralPublicKey: liquidatorPubKey } = await loanMarket.getAgentAddresses()
 
-      let pubKeys = swapParams[0]
+      const pubKeys = swapParams[0]
       pubKeys.liquidatorPubKey = liquidatorPubKey
 
       const claimTxHash = await sale.collateralClient().loan.collateralSwap.claim(initTxHash, swapParams[0], secrets, swapParams[1], swapParams[2])
       console.log('claimTxHash', claimTxHash)
-    } catch(e) {
+    } catch (e) {
       console.log('e', e)
     }
 
     done()
-
   })
 }
 

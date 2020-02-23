@@ -64,7 +64,7 @@ function defineLoanStatusJobs (agenda) {
 }
 
 async function getMedianBtcPrice () {
-  let btcPrices = []
+  const btcPrices = []
   for (let i = 0; i < apis.length; i++) {
     const btcPrice = await apis[i]()
     btcPrices.push(parseFloat(btcPrice))
@@ -87,7 +87,6 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
     const { off, sale } = await loans.methods.bools(numToBytes32(loanId)).call()
 
     if (!off && !sale) {
-
       const collateralBalance = await loanModel.collateralClient().chain.getBalance([collateralRefundableP2SHAddress, collateralSeizableP2SHAddress])
 
       const collateralValue = BN(collateralBalance).dividedBy(currencies[collateral].multiplier).times(medianBtcPrice).toFixed()
@@ -182,22 +181,22 @@ async function checkSales (loanMarket, agenda, medianBtcPrice) {
 
           const { data: unfilteredAgents } = await axios.get(
             `${getEndpoint('ARBITER_ENDPOINT')}/agents`
-          );
+          )
 
           const agents = unfilteredAgents.filter(
-            agent => agent.principalAddress === ensure0x(saleModel.loan.lenderPrincipalAddress) && agent.status === 'ACTIVE',
-          );
-          const lenderUrl = agents[0].url;
+            agent => agent.principalAddress === ensure0x(saleModel.loan.lenderPrincipalAddress) && agent.status === 'ACTIVE'
+          )
+          const lenderUrl = agents[0].url
 
           const {
-            data: { secretB },
-          } = await axios.get(`${lenderUrl}/sales/contract/${principal}/${saleId}`);
-          console.log(`${lenderUrl}/sales/contract/${principal}/${saleId}`);
+            data: { secretB }
+          } = await axios.get(`${lenderUrl}/sales/contract/${principal}/${saleId}`)
+          console.log(`${lenderUrl}/sales/contract/${principal}/${saleId}`)
           const {
-            data: { secretC, initTxHash },
+            data: { secretC, initTxHash }
           } = await axios.get(
-            `${getEndpoint('ARBITER_ENDPOINT')}/sales/contract/${principal}/${saleId}`,
-          );
+            `${getEndpoint('ARBITER_ENDPOINT')}/sales/contract/${principal}/${saleId}`
+          )
           console.log(`${getEndpoint('ARBITER_ENDPOINT')}/sales/contract/${principal}/${saleId}`)
 
           console.log('initTxHash', initTxHash)
