@@ -77,6 +77,8 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
 
   const loans = getObject('loans', principal)
 
+  const currentTime = await getCurrentTime()
+
   const loanModels = await Loan.find({ principal, status: { $nin: ['QUOTE', 'REQUESTING', 'CANCELLING', 'CANCELLED', 'ACCEPTING', 'ACCEPTED', 'LIQUIDATING', 'LIQUIDATED', 'FAILED'] } }).exec()
 
   for (let i = 0; i < loanModels.length; i++) {
@@ -85,18 +87,29 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
     const { loanId, collateralRefundableP2SHAddress, collateralSeizableP2SHAddress } = loanModel
 
     const { off, sale } = await loans.methods.bools(numToBytes32(loanId)).call()
+    const { loanExpiration } = await loans.methods.loans(numToBytes32(loanId)).call()
 
     if (!off && !sale) {
       const collateralBalance = await loanModel.collateralClient().chain.getBalance([collateralRefundableP2SHAddress, collateralSeizableP2SHAddress])
 
+      console.log('Loan ID', loanId)
       const collateralValue = BN(collateralBalance).dividedBy(currencies[collateral].multiplier).times(medianBtcPrice).toFixed()
       console.log('collateralValue', collateralValue)
 
       const minCollateralValueInUnits = await loans.methods.minCollateralValue(numToBytes32(loanId)).call()
+      console.log('minCollateralValueInUnits', minCollateralValueInUnits)
       const minCollateralValue = fromWei(minCollateralValueInUnits, 'ether')
       console.log('minCollateralValue', minCollateralValue)
 
-      if (BN(collateralValue).isLessThan(minCollateralValue)) {
+      if (currentTime > loanExpiration) {
+        console.log('DEFAULTED')
+
+        loanModel.status = 'LIQUIDATING'
+        await loanModel.save()
+
+        agenda.now('liquidate-loan', { loanModelId: loanModel.id })
+      } else if (BN(collateralValue).isLessThan(minCollateralValue)) {
+        console.log('!SAFE')
         console.log('LIQUIDATE')
 
         const safe = await loans.methods.safe(numToBytes32(loanId)).call()
