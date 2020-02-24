@@ -1,6 +1,6 @@
 const axios = require('axios')
 const BN = require('bignumber.js')
-const { remove0x } = require('@liquality/ethereum-utils')
+const { ensure0x, remove0x } = require('@liquality/ethereum-utils')
 const { sha256 } = require('@liquality/crypto')
 const compareVersions = require('compare-versions')
 const median = require('median')
