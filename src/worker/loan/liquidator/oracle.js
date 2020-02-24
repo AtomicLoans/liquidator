@@ -92,7 +92,9 @@ function defineOracleJobs (agenda) {
       const oraclePrice = parseFloat(fromWei(hexToNumberString(oraclePriceInBytes32), 'ether'))
 
       const { data } = await axios.get('https://api.kraken.com/0/public/Ticker?pair=XBTUSD')
-      const btcPrice = parseFloat(data.result.XXBTZUSD.c[0])
+      // const btcPrice = parseFloat(data.result.XXBTZUSD.c[0])
+
+      const btcPrice = '6600'
 
       if ((Math.abs(1 - (btcPrice / oraclePrice)) * 100) > 1) {
         const txData = med.methods.poke(ensure0x(numToBytes32(toWei(btcPrice.toString(), 'ether'))), true).encodeABI()

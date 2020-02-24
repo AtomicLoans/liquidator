@@ -46,7 +46,8 @@ function defineLoanStatusJobs (agenda) {
         const ethBalance = await web3().eth.getBalance(principalAddress)
 
         if (ethBalance > 0) {
-          const medianBtcPrice = await getMedianBtcPrice()
+          // const medianBtcPrice = await getMedianBtcPrice()
+          const medianBtcPrice = '6600'
           await approveTokens(loanMarket, agenda)
           await checkLoans(loanMarket, agenda, medianBtcPrice)
           await checkSales(loanMarket, agenda, medianBtcPrice)
@@ -85,6 +86,8 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
     const loanModel = loanModels[i]
 
     const { loanId, collateralRefundableP2SHAddress, collateralSeizableP2SHAddress } = loanModel
+
+    if (parseInt(loanId) === 1) break
 
     const { off, sale } = await loans.methods.bools(numToBytes32(loanId)).call()
     const { loanExpiration } = await loans.methods.loans(numToBytes32(loanId)).call()
