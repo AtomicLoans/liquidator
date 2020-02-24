@@ -18,7 +18,7 @@ const { getObject, getContract } = require('../../../utils/contracts')
 const { getInterval } = require('../../../utils/intervals')
 const { isArbiter } = require('../../../utils/env')
 const { currencies } = require('../../../utils/fx')
-const { BlockchainInfo, CoinMarketCap, CryptoCompare, Gemini, BitBay, Bitstamp, Coinbase, CryptoWatch, Coinpaprika, Kraken } = require('../../../utils/getPrices')
+const { getMedianBtcPrice } = require('../../../utils/getPrices')
 const { getEndpoint } = require('../../../utils/endpoints')
 const { getLockArgs, getCollateralAmounts, isCollateralRequirementsSatisfied } = require('../utils/collateral')
 const getMailer = require('../utils/mailer')
@@ -26,10 +26,6 @@ const handleError = require('../../../utils/handleError')
 
 const web3 = require('../../../utils/web3')
 const { hexToNumber, fromWei } = web3().utils
-
-const apis = [
-  BlockchainInfo, Gemini, BitBay, Bitstamp, Coinbase, CryptoWatch, Coinpaprika, Kraken
-]
 
 function defineLoanStatusJobs (agenda) {
   const mailer = getMailer(agenda)
@@ -61,15 +57,6 @@ function defineLoanStatusJobs (agenda) {
       done()
     }
   })
-}
-
-async function getMedianBtcPrice () {
-  const btcPrices = []
-  for (let i = 0; i < apis.length; i++) {
-    const btcPrice = await apis[i]()
-    btcPrices.push(parseFloat(btcPrice))
-  }
-  return median(btcPrices)
 }
 
 async function checkLoans (loanMarket, agenda, medianBtcPrice) {
