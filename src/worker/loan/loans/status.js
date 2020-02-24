@@ -1,6 +1,6 @@
 const axios = require('axios')
 const BN = require('bignumber.js')
-const { remove0x } = require('@liquality/ethereum-utils')
+const { ensure0x, remove0x } = require('@liquality/ethereum-utils')
 const { sha256 } = require('@liquality/crypto')
 const compareVersions = require('compare-versions')
 const median = require('median')
@@ -196,8 +196,10 @@ async function checkSales (loanMarket, agenda, medianBtcPrice) {
             `${getEndpoint('ARBITER_ENDPOINT')}/agents`
           )
 
+          const { lender: lenderPrincipalAddress } = await sales.methods.sales(numToBytes32(saleId)).call()
+
           const agents = unfilteredAgents.filter(
-            agent => agent.principalAddress === ensure0x(saleModel.loan.lenderPrincipalAddress) && agent.status === 'ACTIVE'
+            agent => agent.principalAddress === ensure0x(lenderPrincipalAddress) && agent.status === 'ACTIVE'
           )
           const lenderUrl = agents[0].url
 

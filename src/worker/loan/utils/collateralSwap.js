@@ -2,7 +2,6 @@ const { remove0x } = require('@liquality/ethereum-utils')
 const { getObject } = require('../../../utils/contracts')
 
 async function getInitArgs (loanId, saleId, principal, collateral) {
-  console.log('test1')
   const loans = getObject('loans', principal)
   const sales = getObject('sales', principal)
 
