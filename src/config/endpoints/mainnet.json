@@ -1,3 +1,3 @@
 {
-  "ARBITER_ENDPOINT": "https://atomicloans.io/agent/mainnet/api/loan"
+  "ARBITER_ENDPOINT": "https://arbiter.atomic.loans/api/loan"
 }
