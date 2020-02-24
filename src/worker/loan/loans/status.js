@@ -87,7 +87,7 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
 
     const { loanId, collateralRefundableP2SHAddress, collateralSeizableP2SHAddress } = loanModel
 
-    if (parseInt(loanId) === 1) break
+    if (parseInt(loanId) === 1) continue
 
     const { off, sale } = await loans.methods.bools(numToBytes32(loanId)).call()
     const { loanExpiration } = await loans.methods.loans(numToBytes32(loanId)).call()
