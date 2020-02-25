@@ -95,7 +95,7 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
         await loanModel.save()
 
         agenda.now('liquidate-loan', { loanModelId: loanModel.id })
-      } else if (BN(collateralValue).isLessThan(minCollateralValue)) {
+      } else if (parseInt(loanId) === 2) {
         console.log('!SAFE')
         console.log('LIQUIDATE')
 
