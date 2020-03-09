@@ -1,6 +1,7 @@
 const axios = require('axios')
 const { ensure0x } = require('@liquality/ethereum-utils')
 const date = require('date.js')
+const BN = require('bignumber.js')
 
 const EthTx = require('../../../models/EthTx')
 const LoanMarket = require('../../../models/LoanMarket')
@@ -14,10 +15,12 @@ const handleError = require('../../../utils/handleError')
 const web3 = require('../../../utils/web3')
 const { hexToNumberString, fromWei, toWei } = web3().utils
 
+const { getMedianBtcPrice } = require('../../../utils/getPrices')
+const { getCurrentTime } = require('../../../utils/time')
+
 const apis = [
   BlockchainInfo, CoinMarketCap, CryptoCompare, Gemini, BitBay, Bitstamp, Coinbase, CryptoWatch, Coinpaprika, Kraken
 ]
-const numOracles = 10
 
 function defineOracleJobs (agenda) {
   agenda.define('check-liquidator-oracle', async (job, done) => {
@@ -32,49 +35,101 @@ function defineOracleJobs (agenda) {
 
     const med = getObject('medianizer')
 
-    let arr = Array.apply(0, new Array(numOracles)).map(function (_, i) { return i })
-    for (let k = 0; k < numOracles; k++) {
-      arr = arr.sort(function (a, b) { return Math.random() > 0.5 })
-    }
-
     if (NETWORK === 'mainnet') {
-      const currentTime = Math.floor(new Date().getTime() / 1000)
+      const currentTime = parseInt(await getCurrentTime())
+      console.log('currentTime', currentTime)
 
-      for (let j = 0; j < numOracles; j++) {
-        const i = arr[j]
+      const medianBtcPrice = await getMedianBtcPrice()
 
-        const oracleAddress = await med.methods.oracles(i).call()
+      console.log('medianBtcPrice', medianBtcPrice)
 
-        const oracle = loadObject('oracle', oracleAddress)
+      const medPeek = await med.methods.peek().call()
+      const medPriceInBytes32 = medPeek[0]
+      const medPrice = parseFloat(fromWei(hexToNumberString(medPriceInBytes32), 'ether'))
+      console.log('medPrice', medPrice)
 
-        const expiry = await oracle.methods.expiry().call()
-        const peek = await oracle.methods.peek().call()
+      const medHasPrice = medPeek[1]
+      console.log('medHasPrice', medHasPrice)
 
-        const oraclePriceInBytes32 = peek[0]
-        const oraclePrice = parseFloat(fromWei(hexToNumberString(oraclePriceInBytes32), 'ether'))
+      if ((Math.abs(1 - (medianBtcPrice / medPrice)) * 100) > 1 || !medHasPrice) {
+        console.log('MEDIANIZER PRICE CHANGED')
 
-        const btcPrice = await apis[i]()
-        console.log('btcPrice', btcPrice)
+        let oracles = []
 
-        // Check that price has changed at least 1% and the oracle hasn't been updated in the last 15 min
-        if ((Math.abs(1 - (btcPrice / oraclePrice)) * 100) > 1 && currentTime > expiry) {
+        for (let i = 0; i < 10; i++) {
+          const oracle = {}
+
+          const oracleAddress = await med.methods.oracles(i).call()
+
+          const oracleContract = loadObject('oracle', oracleAddress)
+
+          const expiry = await oracleContract.methods.expiry().call()
+          const timeout = await oracleContract.methods.timeout().call()
+          const peek = await oracleContract.methods.peek().call()
+
+          const oraclePriceInBytes32 = peek[0]
+          const oraclePrice = parseFloat(fromWei(hexToNumberString(oraclePriceInBytes32), 'ether'))
+
+          let btcPrice = medianBtcPrice
+          try {
+            btcPrice = await apis[i]()
+            console.log('btcPrice', btcPrice)
+
+            oracle.priceChange = Math.abs(1 - (btcPrice / oraclePrice)) * 100
+          } catch (e) {
+            oracle.priceChange = 1.001
+          }
+
+          oracle.index = i
+          oracle.pastExpiry = currentTime > parseInt(expiry)
+          oracle.pastTimeout = currentTime > parseInt(timeout)
+          oracle.oraclePrice = oraclePrice
+          oracle.btcPrice = btcPrice
+          oracle.currentTime = currentTime
+          oracle.expiry = expiry
+          oracle.timeout = timeout
+
+          oracles.push(oracle)
+        }
+
+        oracles = oracles.sort((a, b) => b.priceChange - a.priceChange)
+
+        const numExpired = oracles.filter(x => x.pastExpiry).length
+        const numOutOfDate = oracles.filter(x => x.priceChange > 1 && x.pastTimeout).length
+
+        console.log('oracles', oracles)
+        console.log('numExpired', numExpired)
+        console.log('numOutOfDate', numOutOfDate)
+
+        if (!medHasPrice || (numExpired > 5 && numOutOfDate > 0)) {
+          oracles = oracles.filter(x => (x.pastExpiry || x.priceChange > 1) && x.pastTimeout)
+        } else {
+          oracles = oracles.filter(x => x.priceChange > 1 && x.pastTimeout)
+        }
+
+        console.log('oracles', oracles)
+
+        for (let k = 0; k < oracles.length; k++) {
+          const oracle = oracles[k]
+          const { index, oraclePrice, btcPrice } = oracle
+
           try {
             console.log('UPDATING ORACLES')
 
             const fundOracles = getObject('fundoracles')
 
-            const payment = await fundOracles.methods.billWithEth(i).call()
-            const paymentEth = await fundOracles.methods.paymentWithEth(i, payment).call()
+            const payment = await fundOracles.methods.billWithEth(index).call()
+            const paymentEth = await fundOracles.methods.paymentWithEth(index, payment).call()
 
-            const txData = await fundOracles.methods.updateWithEth(i, payment, getContract('erc20', 'DAI')).encodeABI()
+            const txData = await fundOracles.methods.updateWithEth(index, payment, getContract('erc20', 'DAI')).encodeABI()
 
             const oracleUpdate = OracleUpdate.fromOracleUpdate(oraclePrice, btcPrice)
             await oracleUpdate.save()
 
             const ethTx = await setTxParams(txData, arbiterAddress, getContract('fundoracles'), oracleUpdate)
 
-            ethTx.value = paymentEth
-            ethTx.gasLimit = 700000
+            ethTx.value = index < 5 ? BN(paymentEth).plus(10e12).toString() : paymentEth
+            ethTx.gasLimit = 1500000
             await ethTx.save()
 
             console.log('ethTx', ethTx)
