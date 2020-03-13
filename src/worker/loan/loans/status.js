@@ -154,7 +154,7 @@ async function checkSales (loanMarket, agenda, medianBtcPrice) {
       const collateralValue = BN(collateralSwapBalance).dividedBy(currencies[collateral].multiplier).times(medianBtcPrice).toFixed()
       console.log('collateralValue', collateralValue)
 
-      if (BN(collateralValue).isGreaterThan(discountBuy)) {
+      // if (BN(collateralValue).isGreaterThan(discountBuy)) {
         console.log('SHOULD CLAIM COLLATERAL')
 
         if (process.env.NODE_ENV === 'test') {
@@ -220,7 +220,7 @@ async function checkSales (loanMarket, agenda, medianBtcPrice) {
             await saleModel.save()
           }
         }
-      }
+      // }
     }
   }
 }
