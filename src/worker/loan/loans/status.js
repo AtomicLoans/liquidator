@@ -126,8 +126,6 @@ async function checkSales (loanMarket, agenda, medianBtcPrice) {
 
   const sales = getObject('sales', principal)
 
-  await Sale.remove({ saleId: 3 }).exec()
-
   const saleModels = await Sale.find({ principal, status: { $in: ['INITIATED', 'COLLATERAL_SENDING', 'COLLATERAL_SENT'] } }).exec()
 
   const currentTime = await getCurrentTime()
