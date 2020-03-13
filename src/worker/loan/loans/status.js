@@ -104,7 +104,7 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
         if (safe) {
           // update oracles
 
-          agenda.now('check-liquidator-oracle')
+          // agenda.now('check-liquidator-oracle')
         } else {
           loanModel.status = 'LIQUIDATING'
           await loanModel.save()
