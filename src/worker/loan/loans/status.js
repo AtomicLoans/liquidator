@@ -135,11 +135,11 @@ async function checkSales (loanMarket, agenda, medianBtcPrice) {
 
     const { saleId, collateralSwapRefundableP2SHAddress, collateralSwapSeizableP2SHAddress, settlementExpiration } = saleModel
 
-    if (currentTime > settlementExpiration) {
-      console.log('SHOULD REFUND')
+    // if (currentTime > settlementExpiration) {
+    //   console.log('SHOULD REFUND')
 
-      agenda.now('refund-sale', { saleModelId: saleModel.id })
-    } else {
+    //   agenda.now('refund-sale', { saleModelId: saleModel.id })
+    // } else {
       const collateralSwapBalance = await saleModel.collateralClient().chain.getBalance([collateralSwapRefundableP2SHAddress, collateralSwapSeizableP2SHAddress])
 
       console.log('saleId', saleId)
@@ -219,7 +219,7 @@ async function checkSales (loanMarket, agenda, medianBtcPrice) {
           }
         }
       // }
-    }
+    // }
   }
 }
 
