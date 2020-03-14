@@ -5,6 +5,8 @@ const { getEthSigner } = require('../../../utils/address')
 const { verifySignature } = require('../../../utils/signatures')
 const LoanMarket = require('../../../models/LoanMarket')
 const { version } = require('../../../../package.json')
+const { currencies } = require('../../../utils/fx')
+const BN = require('bignumber.js')
 
 const ncp = require('ncp').ncp
 ncp.limit = 16
@@ -45,15 +47,25 @@ function defineAgentRoutes (router) {
     const { params } = req
     let { principal, collateral } = params
 
-    if (principal === 'DAI') {
-      principal = 'SAI'
-    }
-
     const loanMarket = await LoanMarket.findOne({ principal, collateral }).exec()
 
     const agentAddresses = await loanMarket.getAgentAddresses()
 
     res.json(agentAddresses)
+  }))
+
+  router.get('/agentinfo/balance/btc', asyncHandler(async (req, res) => {
+    const loanMarket = await LoanMarket.findOne().exec()
+
+    const usedAddresses = await loanMarket.collateralClient().wallet.getUsedAddresses()
+    console.log('usedAddresses', usedAddresses)
+
+    const unusedAddress = await loanMarket.collateralClient().wallet.getUnusedAddress()
+    console.log('unusedAddress', unusedAddress)
+
+    const balance = await loanMarket.collateralClient().chain.getBalance(usedAddresses)
+
+    res.json({ btcBalance: BN(balance).dividedBy(currencies['BTC'].multiplier).toFixed(8), unusedAddress, usedAddresses })
   }))
 
   router.post('/backupseedphrase', asyncHandler(async (req, res, next) => {

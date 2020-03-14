@@ -13,3 +13,7 @@ exports.key = function (req, res) {
 exports.success = function (req, res) {
   res.render('success')
 }
+
+exports.dashboard = function (req, res) {
+  res.render('dashboard')
+}
