@@ -75,6 +75,8 @@ class App extends React.Component {
 
                         document.getElementById("btc-amount").innerHTML = btcBalance
 
+                        // BTC Start
+
                         document.getElementById('submit-btc').onclick = function() {
                           var btcWithdrawAddress = document.getElementById("btc-address").value;
                           console.log(btcWithdrawAddress)
@@ -96,7 +98,7 @@ class App extends React.Component {
                               if (xmlhttp.status === 200) {
                                 const response = JSON.parse(xmlhttp.responseText)
                                 console.log('response', response)
-                                window.open('/success', '_self')
+                                document.getElementById('btc-withdraw-hash').innerHTML = response.withdrawHash
                               } else if (xmlhttp.status !== 200) {
                                 alert('An error occured')
                               }
@@ -107,6 +109,110 @@ class App extends React.Component {
                         document.getElementById('btc-use-max').onclick = function() {
                           document.getElementById('btc-withdraw-amount').value = parseFloat(btcBalance) - 0.005
                         }
+
+                        // BTC Stop
+
+                        // ETH Start
+
+                        document.getElementById('submit-eth').onclick = function() {
+                          const currentTime = Math.floor(new Date().getTime() / 1000)
+                          const currency = 'ETH'
+
+                          const amount = document.getElementById('eth-withdraw-amount').value
+
+                          const address = web3.toChecksumAddress(res[0])
+                          const message = 'Withdraw ' + amount + ' ' + currency + ' to ' + address + ' at ' + currentTime
+                          web3.personal.sign(message, address, (err, res) => {
+                            var xmlhttp = new XMLHttpRequest()
+                            var theUrl = "/api/loan/withdraw"
+                            xmlhttp.open("POST", theUrl)
+                            xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8")
+                            xmlhttp.send(JSON.stringify({ "signature": res, "message": message, "timestamp": currentTime, "currency": "ETH", "amount": amount }))
+                            xmlhttp.onload = function() {
+                              if (xmlhttp.status === 200) {
+                                const response = JSON.parse(xmlhttp.responseText)
+                                console.log('response', response)
+                                document.getElementById('eth-withdraw-hash').innerHTML = response.withdrawHash
+                              } else if (xmlhttp.status !== 200) {
+                                alert('An error occured')
+                              }
+                            }
+                          })
+                        }
+
+                        document.getElementById('eth-use-max').onclick = function() {
+                          document.getElementById('eth-withdraw-amount').value = parseFloat(web3.fromWei(ethBalance)) - 0.0005
+                        }
+
+                        // ETH Stop
+
+                        // DAI Start
+
+                        document.getElementById('submit-dai').onclick = function() {
+                          const currentTime = Math.floor(new Date().getTime() / 1000)
+                          const currency = 'DAI'
+
+                          const amount = document.getElementById('dai-withdraw-amount').value
+
+                          const address = web3.toChecksumAddress(res[0])
+                          const message = 'Withdraw ' + amount + ' ' + currency + ' to ' + address + ' at ' + currentTime
+                          web3.personal.sign(message, address, (err, res) => {
+                            var xmlhttp = new XMLHttpRequest()
+                            var theUrl = "/api/loan/withdraw"
+                            xmlhttp.open("POST", theUrl)
+                            xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8")
+                            xmlhttp.send(JSON.stringify({ "signature": res, "message": message, "timestamp": currentTime, "currency": "DAI", "amount": amount }))
+                            xmlhttp.onload = function() {
+                              if (xmlhttp.status === 200) {
+                                const response = JSON.parse(xmlhttp.responseText)
+                                console.log('response', response)
+                                document.getElementById('dai-withdraw-hash').innerHTML = response.withdrawHash
+                              } else if (xmlhttp.status !== 200) {
+                                alert('An error occured')
+                              }
+                            }
+                          })
+                        }
+
+                        document.getElementById('dai-use-max').onclick = function() {
+                          document.getElementById('dai-withdraw-amount').value = parseFloat(web3.fromWei(daiBalance))
+                        }
+
+                        // DAI End
+
+                        // USDC Start
+
+                        document.getElementById('submit-usdc').onclick = function() {
+                          const currentTime = Math.floor(new Date().getTime() / 1000)
+                          const currency = 'USDC'
+
+                          const amount = document.getElementById('usdc-withdraw-amount').value
+
+                          const address = web3.toChecksumAddress(res[0])
+                          const message = 'Withdraw ' + amount + ' ' + currency + ' to ' + address + ' at ' + currentTime
+                          web3.personal.sign(message, address, (err, res) => {
+                            var xmlhttp = new XMLHttpRequest()
+                            var theUrl = "/api/loan/withdraw"
+                            xmlhttp.open("POST", theUrl)
+                            xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8")
+                            xmlhttp.send(JSON.stringify({ "signature": res, "message": message, "timestamp": currentTime, "currency": "USDC", "amount": amount }))
+                            xmlhttp.onload = function() {
+                              if (xmlhttp.status === 200) {
+                                const response = JSON.parse(xmlhttp.responseText)
+                                console.log('response', response)
+                                document.getElementById('usdc-withdraw-hash').innerHTML = response.withdrawHash
+                              } else if (xmlhttp.status !== 200) {
+                                alert('An error occured')
+                              }
+                            }
+                          })
+                        }
+
+                        document.getElementById('usdc-use-max').onclick = function() {
+                          document.getElementById('usdc-withdraw-amount').value = parseFloat(web3.fromWei(usdcBalance))
+                        }
+
+                        // USDC End
                       }
                       else if (xmlhttp.status !== 200) {
                         alert('An error occured')
@@ -174,6 +280,27 @@ class App extends React.Component {
               </tbody>
             </table>
 
+            <div className='field'>
+              <input placeholder='100' label='USDC Amount' value='' id='usdc-withdraw-amount' />
+              <div className='field_aside click theme1' id='submit-usdc'>Submit</div>
+            </div>
+            <button id='usdc-use-max'>Use Max</button>
+            <p id='usdc-withdraw-hash'></p>
+
+            <div className='field'>
+              <input placeholder='100' label='DAI Amount' value='' id='dai-withdraw-amount' />
+              <div className='field_aside click theme1' id='submit-dai'>Submit</div>
+            </div>
+            <button id='dai-use-max'>Use Max</button>
+            <p id='dai-withdraw-hash'></p>
+
+            <div className='field'>
+              <input placeholder='2.3' label='2.3' value='' id='eth-withdraw-amount' />
+              <div className='field_aside click theme1' id='submit-eth'>Submit</div>
+            </div>
+            <button id='eth-use-max'>Use Max</button>
+            <p id='eth-withdraw-hash'></p>
+
             <table className="MuiTable-root">
               <thead className="MuiTableHead-root">
                 <p id="liquidator-btc-receive-address" style={{ textAlign: 'left' }}></p>
@@ -199,6 +326,7 @@ class App extends React.Component {
               <div className='field_aside click theme1' id='submit-btc'>Submit</div>
             </div>
             <button id='btc-use-max'>Use Max</button>
+            <p id='btc-withdraw-hash'></p>
 
             <br />
             <br />
