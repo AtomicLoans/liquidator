@@ -58,10 +58,7 @@ function defineAgentRoutes (router) {
     const loanMarket = await LoanMarket.findOne().exec()
 
     const usedAddresses = await loanMarket.collateralClient().wallet.getUsedAddresses()
-    console.log('usedAddresses', usedAddresses)
-
     const unusedAddress = await loanMarket.collateralClient().wallet.getUnusedAddress()
-    console.log('unusedAddress', unusedAddress)
 
     const balance = await loanMarket.collateralClient().chain.getBalance(usedAddresses)
 

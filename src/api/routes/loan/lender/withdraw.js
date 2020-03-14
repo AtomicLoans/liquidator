@@ -28,7 +28,7 @@ function defineWithdrawRoutes (router) {
 
     const toAmount = BN(amount).times(currencies[currency].multiplier).toFixed()
 
-    const withdrawHash = await clients[currency].chain.sendTransaction(withdrawAddress, toAmount)
+    const withdrawHash = await clients[currency].chain.sendTransaction(withdrawAddress, currency === 'BTC' ? parseInt(toAmount) : toAmount)
 
     res.json({ withdrawHash })
   }))
