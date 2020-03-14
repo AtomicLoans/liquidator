@@ -13,13 +13,22 @@ function defineWithdrawRoutes (router) {
     const { body } = req
     const { signature, message, amount, timestamp, currency } = body
 
+    let withdrawAddress
+    if (body.withdrawAddress) {
+      withdrawAddress = body.withdrawAddress
+    } else {
+      withdrawAddress = address
+    }
+
     if (!verifySignature(signature, message, address)) return next(res.createError(401, 'Signature doesn\'t match address'))
-    if (!(message === `Withdraw ${amount} ${currency} to ${address} at ${timestamp}`)) return next(res.createError(401, 'Message doesn\'t match params'))
+    console.log('message', message)
+    console.log(`Withdraw ${amount} ${currency} to ${withdrawAddress} at ${timestamp}`)
+    if (!(message === `Withdraw ${amount} ${currency} to ${withdrawAddress} at ${timestamp}`)) return next(res.createError(401, 'Message doesn\'t match params'))
     if (!(currentTime <= (timestamp + 60))) return next(res.createError(401, 'Signature is stale'))
 
     const toAmount = BN(amount).times(currencies[currency].multiplier).toFixed()
 
-    const withdrawHash = await clients[currency].chain.sendTransaction(address, toAmount)
+    const withdrawHash = await clients[currency].chain.sendTransaction(withdrawAddress, toAmount)
 
     res.json({ withdrawHash })
   }))

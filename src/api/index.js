@@ -84,6 +84,7 @@ app.get('/', require('./viewRoutes').index)
 app.get('/verify', require('./viewRoutes').verify)
 app.get('/key', require('./viewRoutes').key)
 app.get('/success', require('./viewRoutes').success)
+app.get('/dashboard', require('./viewRoutes').dashboard)
 
 if (NODE_ENV === 'production') {
   app.use(Sentry.Handlers.errorHandler())
