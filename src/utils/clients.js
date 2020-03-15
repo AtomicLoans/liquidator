@@ -16,8 +16,10 @@ const BitcoinSwapProvider = require('@liquality/bitcoin-swap-provider')
 const BitcoinCollateralProvider = require('@atomicloans/bitcoin-collateral-provider')
 const BitcoinCollateralSwapProvider = require('@atomicloans/bitcoin-collateral-swap-provider')
 const BitcoinNetworks = require('@liquality/bitcoin-networks')
+const EthereumNetworks = require('@liquality/ethereum-networks')
 
 const EthereumRpcProvider = require('@liquality/ethereum-rpc-provider')
+const EthereumJsWalletProvider = require('@liquality/ethereum-js-wallet-provider')
 const EthereumSwapProvider = require('@liquality/ethereum-swap-provider')
 const EthereumErc20Provider = require('@liquality/ethereum-erc20-provider')
 
@@ -38,18 +40,22 @@ BTC.loan.addProvider(new BitcoinCollateralSwapProvider({ network: BitcoinNetwork
 
 const ETH = new Client()
 ETH.addProvider(new EthereumRpcProvider(ETH_RPC, ETH_USER, ETH_PASS))
+ETH.addProvider(new EthereumJsWalletProvider(EthereumNetworks[NETWORK], MNEMONIC))
 ETH.addProvider(new EthereumSwapProvider())
 
 const SAI = new Client()
 SAI.addProvider(new EthereumRpcProvider(ETH_RPC, ETH_USER, ETH_PASS))
+SAI.addProvider(new EthereumJsWalletProvider(EthereumNetworks[NETWORK], MNEMONIC))
 SAI.addProvider(new EthereumErc20Provider(addresses.SAI))
 
 const DAI = new Client()
 DAI.addProvider(new EthereumRpcProvider(ETH_RPC, ETH_USER, ETH_PASS))
+DAI.addProvider(new EthereumJsWalletProvider(EthereumNetworks[NETWORK], MNEMONIC))
 DAI.addProvider(new EthereumErc20Provider(addresses.DAI))
 
 const USDC = new Client()
 USDC.addProvider(new EthereumRpcProvider(ETH_RPC, ETH_USER, ETH_PASS))
+USDC.addProvider(new EthereumJsWalletProvider(EthereumNetworks[NETWORK], MNEMONIC))
 USDC.addProvider(new EthereumErc20Provider(addresses.USDC))
 
 module.exports = {
