@@ -86,6 +86,7 @@
     "@bugsnag/plugin-express": "^6.4.1",
     "@liquality/bitcoin-esplora-api-provider": "^0.4.23",
     "@liquality/bitcoin-js-wallet-provider": "^0.4.23",
+    "@liquality/ethereum-js-wallet-provider": "^0.4.23",
     "@liquality/bitcoin-networks": "^0.4.23",
     "@liquality/bitcoin-rpc-provider": "^0.4.23",
     "@liquality/bitcoin-swap-provider": "^0.4.23",
@@ -150,7 +151,6 @@
   "devDependencies": {
     "@liquality/bitcoin-ledger-provider": "^0.4.23",
     "@liquality/bitcoin-node-wallet-provider": "^0.4.23",
-    "@liquality/ethereum-js-wallet-provider": "^0.4.23",
     "@liquality/ethereum-metamask-provider": "^0.4.23",
     "@mblackmblack/bitcoinjs-lib": "^5.1.6",
     "chai": "^4.2.0",
