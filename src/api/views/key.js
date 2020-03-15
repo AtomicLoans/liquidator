@@ -22,7 +22,7 @@ class App extends React.Component {
                 if (xmlhttp.status === 200) {
                   const response = JSON.parse(xmlhttp.responseText)
                   console.log('response', response)
-                  window.open('/success', '_self')
+                  window.open('/dashboard', '_self')
                 } else if (xmlhttp.status !== 200) {
                   alert('An error occured')
                 }
