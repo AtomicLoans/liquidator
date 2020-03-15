@@ -38,12 +38,8 @@ WithdrawSchema.methods.json = function () {
   return json
 }
 
-WithdrawSchema.static('fromTxParams', function (params) {
+WithdrawSchema.static('fromTxParams', function () {
   return new Withdraw({
-    fundModelId: params.fundModelId,
-    fundId: params.fundId,
-    amount: params.amount,
-    ethTxId: params.ethTxId,
     status: 'INITIATED'
   })
 })

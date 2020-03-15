@@ -126,6 +126,10 @@ body {
   -webkit-appearance: none;
 }
 
+.field input.left {
+  text-align: left;
+}
+
 .field_aside.click {
   cursor: pointer;
 }
