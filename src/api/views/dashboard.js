@@ -98,7 +98,7 @@ class App extends React.Component {
                               if (xmlhttp.status === 200) {
                                 const response = JSON.parse(xmlhttp.responseText)
                                 console.log('response', response)
-                                document.getElementById('btc-withdraw-hash').innerHTML = response.withdrawHash
+                                document.getElementById('btc-withdraw-hash').innerHTML = '<a href="https://blockstream.info/tx/' + response.withdrawHash + '">https://blockstream.info/tx/' + response.withdrawHash + '</a>'
                               } else if (xmlhttp.status !== 200) {
                                 alert('An error occured')
                               }
@@ -132,7 +132,7 @@ class App extends React.Component {
                               if (xmlhttp.status === 200) {
                                 const response = JSON.parse(xmlhttp.responseText)
                                 console.log('response', response)
-                                document.getElementById('eth-withdraw-hash').innerHTML = response.withdrawHash
+                                document.getElementById('eth-withdraw-hash').innerHTML = '<a href="https://etherscan.io/address/' + liquidatorAddress + '" target="_blank">https://etherscan.io/address/' + liquidatorAddress + '</a>'
                               } else if (xmlhttp.status !== 200) {
                                 alert('An error occured')
                               }
@@ -166,7 +166,7 @@ class App extends React.Component {
                               if (xmlhttp.status === 200) {
                                 const response = JSON.parse(xmlhttp.responseText)
                                 console.log('response', response)
-                                document.getElementById('dai-withdraw-hash').innerHTML = response.withdrawHash
+                                document.getElementById('dai-withdraw-hash').innerHTML = '<a href="https://etherscan.io/address/' + liquidatorAddress + '" target="_blank">https://etherscan.io/address/' + liquidatorAddress + '</a>'
                               } else if (xmlhttp.status !== 200) {
                                 alert('An error occured')
                               }
@@ -200,7 +200,7 @@ class App extends React.Component {
                               if (xmlhttp.status === 200) {
                                 const response = JSON.parse(xmlhttp.responseText)
                                 console.log('response', response)
-                                document.getElementById('usdc-withdraw-hash').innerHTML = response.withdrawHash
+                                document.getElementById('usdc-withdraw-hash').innerHTML = '<a href="https://etherscan.io/address/' + liquidatorAddress + '" target="_blank">https://etherscan.io/address/' + liquidatorAddress + '</a>'
                               } else if (xmlhttp.status !== 200) {
                                 alert('An error occured')
                               }
@@ -209,7 +209,7 @@ class App extends React.Component {
                         }
 
                         document.getElementById('usdc-use-max').onclick = function() {
-                          document.getElementById('usdc-withdraw-amount').value = parseFloat(web3.fromWei(usdcBalance))
+                          document.getElementById('usdc-withdraw-amount').value = parseFloat(web3.fromWei(usdcBalance, 'mwei'))
                         }
 
                         // USDC End
@@ -230,23 +230,6 @@ class App extends React.Component {
       })
     `
 
-    // const timestamp = Math.floor(new Date().getTime() / 1000)
-    // const amount = 1
-    // const currency = 'ETH'
-    // const address = await getWeb3Address(chain)
-    // const message = `Withdraw ${amount} ${currency} to ${address} at ${timestamp}`
-
-    // await chains.ethereumWithNode.client.chain.sendTransaction(address, toWei(amount.toString(), 'ether'))
-
-    // const signature = await chain.client.eth.personal.sign(message, address)
-    // const balanceBefore = await chains.ethereumWithNode.client.chain.getBalance(address)
-
-    // await chai.request(server).post('/withdraw').send({ currency, timestamp, signature, amount, message })
-
-    // const balanceAfter = await chains.ethereumWithNode.client.chain.getBalance(address)
-
-    // expect(BN(balanceAfter).toFixed()).to.equal(BN(balanceBefore).plus(BN(toWei(amount.toString(), 'ether'))).toFixed())
-
     return (
       <>
         <head>
@@ -256,9 +239,14 @@ class App extends React.Component {
           <div className='text-center thin homedashboard'>
             <h1>Dashboard</h1>
 
-            <table className="MuiTable-root">
+              <br/>
+              <br/>
+
+              <h2>Ethereum</h2>
+
+            <p id="liquidator-address">0x</p>
+            <table className="MuiTable-root" style={{ margin: '10px auto' }}>
               <thead className="MuiTableHead-root">
-                <p id="liquidator-address" style={{ textAlign: 'left' }}>0x</p>
                 <tr className="MuiTableRow-root jss162 MuiTableRow-head jss163">
                   <th className="MuiTableCell-root MuiTableCell-head jss169" scope="col">Asset</th>
                   <th className="MuiTableCell-root MuiTableCell-head jss169 MuiTableCell-alignCenter" scope="col">Balance</th>
@@ -280,30 +268,40 @@ class App extends React.Component {
               </tbody>
             </table>
 
+            <br/>
+
+            <p>Withdraw USDC</p>
             <div className='field'>
+              <button id='usdc-use-max'>Use Max</button>
               <input placeholder='100' label='USDC Amount' value='' id='usdc-withdraw-amount' />
-              <div className='field_aside click theme1' id='submit-usdc'>Submit</div>
+              <div className='field_aside click theme1' id='submit-usdc'>Withdraw</div>
             </div>
-            <button id='usdc-use-max'>Use Max</button>
             <p id='usdc-withdraw-hash'></p>
 
+            <p>Withdraw DAI</p>
             <div className='field'>
+              <button id='dai-use-max'>Use Max</button>
               <input placeholder='100' label='DAI Amount' value='' id='dai-withdraw-amount' />
-              <div className='field_aside click theme1' id='submit-dai'>Submit</div>
+              <div className='field_aside click theme1' id='submit-dai'>Withdraw</div>
             </div>
-            <button id='dai-use-max'>Use Max</button>
             <p id='dai-withdraw-hash'></p>
 
+            <p>Withdraw ETH</p>
             <div className='field'>
+              <button id='eth-use-max'>Use Max</button>
               <input placeholder='2.3' label='2.3' value='' id='eth-withdraw-amount' />
-              <div className='field_aside click theme1' id='submit-eth'>Submit</div>
+              <div className='field_aside click theme1' id='submit-eth'>Withdraw</div>
             </div>
-            <button id='eth-use-max'>Use Max</button>
             <p id='eth-withdraw-hash'></p>
 
-            <table className="MuiTable-root">
+            <br/>
+            <br/>
+
+            <h2>Bitcoin</h2>
+
+            <p id="liquidator-btc-receive-address"></p>
+            <table className="MuiTable-root" style={{ margin: '10px auto' }}>
               <thead className="MuiTableHead-root">
-                <p id="liquidator-btc-receive-address" style={{ textAlign: 'left' }}></p>
                 <tr className="MuiTableRow-root jss162 MuiTableRow-head jss163">
                   <th className="MuiTableCell-root MuiTableCell-head jss169" scope="col">Asset</th>
                   <th className="MuiTableCell-root MuiTableCell-head jss169 MuiTableCell-alignCenter" scope="col">Balance</th>
@@ -317,15 +315,17 @@ class App extends React.Component {
               </tbody>
             </table>
 
-            <br />
             <br/>
 
+            <p>Withdraw BTC</p>
             <div className='field'>
-              <input placeholder='bc1qr7tgxt4lexl0ys5q27euz0qatsp09wzva7aycm' label='BTC Address' value='' id='btc-address' />
-              <input placeholder='0.88' label='0.88' value='' id='btc-withdraw-amount' />
-              <div className='field_aside click theme1' id='submit-btc'>Submit</div>
+              <input placeholder='bc1qr7tgxt4lexl0ys5q27euz0qatsp09wzva7aycm' label='BTC Address' value='' id='btc-address' className='left' />
             </div>
-            <button id='btc-use-max'>Use Max</button>
+            <div className='field'>
+              <button id='btc-use-max'>Use Max</button>
+              <input placeholder='0.88' label='0.88' value='' id='btc-withdraw-amount' />
+              <div className='field_aside click theme1' id='submit-btc'>Withdraw</div>
+            </div>
             <p id='btc-withdraw-hash'></p>
 
             <br />
