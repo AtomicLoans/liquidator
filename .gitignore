@@ -13,6 +13,7 @@ deploy
 .vscode
 .env*
 !.env.example
+!test/env/.env.test.example
 deploy-lender
 .nyc_output/
 coverage/
