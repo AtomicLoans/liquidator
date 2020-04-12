@@ -1,7 +1,7 @@
 const Client = require('@liquality/client')
 const LoanClient = require('@atomicloans/loan-client')
 const { isArbiter } = require('./env')
-const { contractAddresses, bitcoinNetworks } = require('../networks/index')
+const { contractAddresses, bitcoinNetworks, ethereumNetworks } = require('../networks/index')
 
 const {
   BTC_RPC, BTC_USER, BTC_PASS, BTC_API,
@@ -25,6 +25,7 @@ const EthereumErc20Provider = require('@liquality/ethereum-erc20-provider')
 
 const addresses = contractAddresses(NETWORK)
 const bitcoinNetwork = bitcoinNetworks(NETWORK).NETWORK
+const ethereumNetwork = ethereumNetworks(NETWORK)
 
 const BTC = new Client()
 const BTCLoan = new LoanClient(BTC)
@@ -40,22 +41,22 @@ BTC.loan.addProvider(new BitcoinCollateralSwapProvider({ network: BitcoinNetwork
 
 const ETH = new Client()
 ETH.addProvider(new EthereumRpcProvider(ETH_RPC, ETH_USER, ETH_PASS))
-ETH.addProvider(new EthereumJsWalletProvider(EthereumNetworks[NETWORK], MNEMONIC))
+ETH.addProvider(new EthereumJsWalletProvider(EthereumNetworks[ethereumNetwork], MNEMONIC))
 ETH.addProvider(new EthereumSwapProvider())
 
 const SAI = new Client()
 SAI.addProvider(new EthereumRpcProvider(ETH_RPC, ETH_USER, ETH_PASS))
-SAI.addProvider(new EthereumJsWalletProvider(EthereumNetworks[NETWORK], MNEMONIC))
+SAI.addProvider(new EthereumJsWalletProvider(EthereumNetworks[ethereumNetwork], MNEMONIC))
 SAI.addProvider(new EthereumErc20Provider(addresses.SAI))
 
 const DAI = new Client()
 DAI.addProvider(new EthereumRpcProvider(ETH_RPC, ETH_USER, ETH_PASS))
-DAI.addProvider(new EthereumJsWalletProvider(EthereumNetworks[NETWORK], MNEMONIC))
+DAI.addProvider(new EthereumJsWalletProvider(EthereumNetworks[ethereumNetwork], MNEMONIC))
 DAI.addProvider(new EthereumErc20Provider(addresses.DAI))
 
 const USDC = new Client()
 USDC.addProvider(new EthereumRpcProvider(ETH_RPC, ETH_USER, ETH_PASS))
-USDC.addProvider(new EthereumJsWalletProvider(EthereumNetworks[NETWORK], MNEMONIC))
+USDC.addProvider(new EthereumJsWalletProvider(EthereumNetworks[ethereumNetwork], MNEMONIC))
 USDC.addProvider(new EthereumErc20Provider(addresses.USDC))
 
 module.exports = {

@@ -54,6 +54,14 @@ function bitcoinNetworks (network) {
   }
 }
 
+function ethereumNetworks (network) {
+  if (network === 'test') {
+    return 'local'
+  } else {
+    return network
+  }
+}
+
 function versions (network) {
   if (network === 'mainnet') {
     return mainnetVersion
@@ -70,5 +78,6 @@ module.exports = {
   endpoints,
   intervals,
   bitcoinNetworks,
+  ethereumNetworks,
   versions
 }

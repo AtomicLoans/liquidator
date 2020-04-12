@@ -31,6 +31,7 @@
     "test:liquidator": "mocha test/loan/liquidator $npm_package_options_mocha",
     "test:liquidator:liquidate": "mocha test/loan/liquidator/liquidate $npm_package_options_mocha",
     "test:liquidator:refund": "mocha test/loan/liquidator/refund $npm_package_options_mocha",
+    "test:liquidator:second_liquidate": "mocha test/loan/liquidator/secondLiquidate $npm_package_options_mocha",
     "test:modules": "nyc mocha test/loan/modules $npm_package_options_mocha",
     "deploy:deposit": "mocha test/loan/lender/deploy/deposit $npm_package_options_mocha",
     "deploy:kill_jobs": "mocha test/loan/lender/deploy/jobs $npm_package_options_mocha",

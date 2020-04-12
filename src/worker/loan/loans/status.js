@@ -62,6 +62,7 @@ function defineLoanStatusJobs (agenda) {
 async function checkLoans (loanMarket, agenda, medianBtcPrice) {
   const { principal, collateral } = loanMarket
 
+  const sales = getObject('sales', principal)
   const loans = getObject('loans', principal)
 
   const currentTime = await getCurrentTime()
@@ -113,6 +114,19 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
         }
       }
     } else if (sale) {
+      const currentTime = await getCurrentTime()
+
+      const next = await sales.methods.next(numToBytes32(loanId)).call()
+      const saleIndex = await sales.methods.saleIndexByLoan(numToBytes32(loanId), parseInt(next) - 1).call()
+      const settlementExpiration = await sales.methods.settlementExpiration(saleIndex)
+
+      if (parseInt(next) < 3 && currentTime > parseInt(settlementExpiration)) {
+        loanModel.status = 'LIQUIDATING'
+        await loanModel.save()
+
+        agenda.now('liquidate-loan', { loanModelId: loanModel.id })
+      }
+
       // TODO: CHECK IF FIRST LIQUIDATION FAILED
     } else {
       loanModel.status = 'ACCEPTED'
@@ -140,85 +154,85 @@ async function checkSales (loanMarket, agenda, medianBtcPrice) {
 
     //   agenda.now('refund-sale', { saleModelId: saleModel.id })
     // } else {
-      const collateralSwapBalance = await saleModel.collateralClient().chain.getBalance([collateralSwapRefundableP2SHAddress, collateralSwapSeizableP2SHAddress])
+    const collateralSwapBalance = await saleModel.collateralClient().chain.getBalance([collateralSwapRefundableP2SHAddress, collateralSwapSeizableP2SHAddress])
 
-      console.log('saleId', saleId)
-      console.log('collateralSwapBalance', BN(collateralSwapBalance).toFixed())
+    console.log('saleId', saleId)
+    console.log('collateralSwapBalance', BN(collateralSwapBalance).toFixed())
 
-      const discountBuyInUnits = await sales.methods.discountBuy(numToBytes32(saleId)).call()
-      const discountBuy = BN(discountBuyInUnits).dividedBy(currencies[principal].multiplier).toFixed()
-      console.log('discountBuy', discountBuy)
+    const discountBuyInUnits = await sales.methods.discountBuy(numToBytes32(saleId)).call()
+    const discountBuy = BN(discountBuyInUnits).dividedBy(currencies[principal].multiplier).toFixed()
+    console.log('discountBuy', discountBuy)
 
-      const collateralValue = BN(collateralSwapBalance).dividedBy(currencies[collateral].multiplier).times(medianBtcPrice).toFixed()
-      console.log('collateralValue', collateralValue)
+    const collateralValue = BN(collateralSwapBalance).dividedBy(currencies[collateral].multiplier).times(medianBtcPrice).toFixed()
+    console.log('collateralValue', collateralValue)
 
-      // if (BN(collateralValue).isGreaterThan(discountBuy)) {
-        console.log('SHOULD CLAIM COLLATERAL')
+    // if (BN(collateralValue).isGreaterThan(discountBuy)) {
+    console.log('SHOULD CLAIM COLLATERAL')
 
-        if (process.env.NODE_ENV === 'test') {
-          const initUtxos = await saleModel.collateralClient().getMethod('jsonrpc')('listunspent', 1, 999999, [collateralSwapRefundableP2SHAddress])
-          const initUtxo = initUtxos[0]
-          const { txid: initTxHash } = initUtxo
+    if (process.env.NODE_ENV === 'test') {
+      const initUtxos = await saleModel.collateralClient().getMethod('jsonrpc')('listunspent', 1, 999999, [collateralSwapRefundableP2SHAddress])
+      const initUtxo = initUtxos[0]
+      const { txid: initTxHash } = initUtxo
 
-          const { secretB, secretC } = await sales.methods.secretHashes(numToBytes32(saleId)).call()
+      const { secretB, secretC } = await sales.methods.secretHashes(numToBytes32(saleId)).call()
 
-          console.log('initTxHash', initTxHash)
-          console.log('secretB', secretB)
-          console.log('secretC', secretC)
+      console.log('initTxHash', initTxHash)
+      console.log('secretB', secretB)
+      console.log('secretC', secretC)
 
-          saleModel.secretB = secretB
-          saleModel.secretC = secretC
-          saleModel.initTxHash = initTxHash
-          saleModel.status = 'SECRETS_PROVIDED'
+      saleModel.secretB = secretB
+      saleModel.secretC = secretC
+      saleModel.initTxHash = initTxHash
+      saleModel.status = 'SECRETS_PROVIDED'
 
-          await saleModel.save()
+      await saleModel.save()
 
-          agenda.now('claim-collateral', { saleModelId: saleModel.id })
-        } else {
-          // check arbiter / lender agent endpoint
+      agenda.now('claim-collateral', { saleModelId: saleModel.id })
+    } else {
+      // check arbiter / lender agent endpoint
 
-          const { data: unfilteredAgents } = await axios.get(
+      const { data: unfilteredAgents } = await axios.get(
             `${getEndpoint('ARBITER_ENDPOINT')}/agents`
-          )
+      )
 
-          const { lender: lenderPrincipalAddress } = await sales.methods.sales(numToBytes32(saleId)).call()
+      const { lender: lenderPrincipalAddress } = await sales.methods.sales(numToBytes32(saleId)).call()
 
-          const agents = unfilteredAgents.filter(
-            agent => agent.principalAddress === ensure0x(lenderPrincipalAddress) && agent.status === 'ACTIVE'
-          )
-          const lenderUrl = agents[0].url
+      const agents = unfilteredAgents.filter(
+        agent => agent.principalAddress === ensure0x(lenderPrincipalAddress) && agent.status === 'ACTIVE'
+      )
+      const lenderUrl = agents[0].url
 
-          const {
-            data: { secretB }
-          } = await axios.get(`${lenderUrl}/sales/contract/${principal}/${saleId}`)
-          console.log(`${lenderUrl}/sales/contract/${principal}/${saleId}`)
-          const {
-            data: { secretC, initTxHash }
-          } = await axios.get(
+      const {
+        data: { secretB }
+      } = await axios.get(`${lenderUrl}/sales/contract/${principal}/${saleId}`)
+      console.log(`${lenderUrl}/sales/contract/${principal}/${saleId}`)
+      const {
+        data: { secretC, initTxHash }
+      } = await axios.get(
             `${getEndpoint('ARBITER_ENDPOINT')}/sales/contract/${principal}/${saleId}`
-          )
-          console.log(`${getEndpoint('ARBITER_ENDPOINT')}/sales/contract/${principal}/${saleId}`)
+      )
+      console.log(`${getEndpoint('ARBITER_ENDPOINT')}/sales/contract/${principal}/${saleId}`)
 
-          console.log('initTxHash', initTxHash)
-          console.log('secretB', secretB)
-          console.log('secretC', secretC)
+      console.log('initTxHash', initTxHash)
+      console.log('secretB', secretB)
+      console.log('secretC', secretC)
 
-          if (secretB && secretC && initTxHash) {
-            saleModel.secretB = secretB
-            saleModel.secretC = secretC
-            saleModel.initTxHash = initTxHash
-            saleModel.status = 'SECRETS_PROVIDED'
+      if (secretB && secretC && initTxHash) {
+        saleModel.secretB = secretB
+        saleModel.secretC = secretC
+        saleModel.initTxHash = initTxHash
+        saleModel.status = 'SECRETS_PROVIDED'
 
-            await saleModel.save()
+        await saleModel.save()
 
-            agenda.now('claim-collateral', { saleModelId: saleModel.id })
-          } else {
-            saleModel.status = 'COLLATERAL_SENT'
+        agenda.now('claim-collateral', { saleModelId: saleModel.id })
+      } else {
+        saleModel.status = 'COLLATERAL_SENT'
 
-            await saleModel.save()
-          }
-        }
-      // }
+        await saleModel.save()
+      }
+    }
+    // }
     // }
   }
 }

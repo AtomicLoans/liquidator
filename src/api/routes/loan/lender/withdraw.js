@@ -66,8 +66,6 @@ function defineWithdrawRoutes (router) {
         await withdrawModel.save()
 
         await sendTransaction(ethTx, withdrawModel, agenda, done, txSuccess, txFailure)
-
-
       }
     }
 

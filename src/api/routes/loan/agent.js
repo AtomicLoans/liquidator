@@ -45,7 +45,7 @@ function defineAgentRoutes (router) {
 
   router.get('/agentinfo/ticker/:principal/:collateral', asyncHandler(async (req, res) => {
     const { params } = req
-    let { principal, collateral } = params
+    const { principal, collateral } = params
 
     const loanMarket = await LoanMarket.findOne({ principal, collateral }).exec()
 
@@ -62,7 +62,7 @@ function defineAgentRoutes (router) {
 
     const balance = await loanMarket.collateralClient().chain.getBalance(usedAddresses)
 
-    res.json({ btcBalance: BN(balance).dividedBy(currencies['BTC'].multiplier).toFixed(8), unusedAddress, usedAddresses })
+    res.json({ btcBalance: BN(balance).dividedBy(currencies.BTC.multiplier).toFixed(8), unusedAddress, usedAddresses })
   }))
 
   router.post('/backupseedphrase', asyncHandler(async (req, res, next) => {
