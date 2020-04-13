@@ -66,7 +66,7 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
 
   const currentTime = await getCurrentTime()
 
-  const loanModels = await Loan.find({ principal, status: { $nin: ['QUOTE', 'REQUESTING', 'CANCELLING', 'CANCELLED', 'ACCEPTING', 'ACCEPTED', 'LIQUIDATING', 'LIQUIDATED', 'FAILED'] } }).exec()
+  const loanModels = await Loan.find({ principal, status: { $nin: ['QUOTE', 'REQUESTING', 'AWAITING_COLLATERAL', 'CANCELLING', 'CANCELLED', 'ACCEPTING', 'ACCEPTED', 'LIQUIDATING', 'LIQUIDATED', 'FAILED'] } }).exec()
 
   for (let i = 0; i < loanModels.length; i++) {
     const loanModel = loanModels[i]
