@@ -124,7 +124,7 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
       console.log('test2')
       const saleIndex = await sales.methods.saleIndexByLoan(numToBytes32(loanId), parseInt(next) - 1).call()
       console.log('test3')
-      const settlementExpiration = await sales.methods.settlementExpiration(saleIndex)
+      const settlementExpiration = await sales.methods.settlementExpiration(saleIndex).call()
       console.log('test4')
 
       console.log('parseInt(next)', parseInt(next))
