@@ -66,7 +66,7 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
 
   const currentTime = await getCurrentTime()
 
-  const loanModels = await Loan.find({ principal, status: { $nin: ['QUOTE', 'REQUESTING', 'AWAITING_COLLATERAL', 'CANCELLING', 'CANCELLED', 'ACCEPTING', 'ACCEPTED', 'LIQUIDATING', 'LIQUIDATED', 'FAILED'] } }).exec()
+  const loanModels = await Loan.find({ principal, status: { $nin: ['QUOTE', 'REQUESTING', 'CANCELLING', 'CANCELLED', 'ACCEPTING', 'ACCEPTED', 'LIQUIDATING', 'LIQUIDATED', 'FAILED'] } }).exec()
 
   for (let i = 0; i < loanModels.length; i++) {
     const loanModel = loanModels[i]
@@ -113,6 +113,8 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
         }
       }
     } else if (sale) {
+      console.log('Loan ID', loanId)
+      console.log('test0')
       const currentTime = await getCurrentTime()
       console.log('test1')
 
@@ -124,6 +126,8 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
       console.log('test3')
       const settlementExpiration = await sales.methods.settlementExpiration(saleIndex)
       console.log('test4')
+
+      console.log('parseInt(next) < 3 && currentTime > parseInt(settlementExpiration)', parseInt(next) < 3 && currentTime > parseInt(settlementExpiration))
 
       if (parseInt(next) < 3 && currentTime > parseInt(settlementExpiration)) {
         loanModel.status = 'LIQUIDATING'
