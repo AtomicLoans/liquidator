@@ -127,6 +127,9 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
       const settlementExpiration = await sales.methods.settlementExpiration(saleIndex)
       console.log('test4')
 
+      console.log('parseInt(next)', parseInt(next))
+      console.log('currentTime', currentTime)
+      console.log('parseInt(settlementExpiration)', parseInt(settlementExpiration))
       console.log('parseInt(next) < 3 && currentTime > parseInt(settlementExpiration)', parseInt(next) < 3 && currentTime > parseInt(settlementExpiration))
 
       if (parseInt(next) < 3 && currentTime > parseInt(settlementExpiration)) {
