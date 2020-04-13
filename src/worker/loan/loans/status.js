@@ -254,15 +254,16 @@ async function approveTokens (loanMarket, agenda) {
   const loansAddress = getContract('loans', principal)
 
   console.log('approveTokens test1')
+  console.log('principalAddress, loansAddress', principalAddress, loansAddress)
 
-  const allowance = await token.methods.allowance(principalAddress, loansAddress).call()
-  const approve = await Approve.findOne({ principal, status: { $nin: ['FAILED'] } }).exec()
+  // const allowance = await token.methods.allowance(principalAddress, loansAddress).call()
+  // const approve = await Approve.findOne({ principal, status: { $nin: ['FAILED'] } }).exec()
 
-  console.log('approveTokens test2')
+  // console.log('approveTokens test2')
 
-  if (parseInt(allowance) === 0 || !approve) {
-    await agenda.schedule(getInterval('ACTION_INTERVAL'), 'approve-tokens', { loanMarketModelId: loanMarket.id })
-  }
+  // if (parseInt(allowance) === 0 || !approve) {
+  //   await agenda.schedule(getInterval('ACTION_INTERVAL'), 'approve-tokens', { loanMarketModelId: loanMarket.id })
+  // }
 }
 
 module.exports = {
