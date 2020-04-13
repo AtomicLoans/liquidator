@@ -115,10 +115,14 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
       }
     } else if (sale) {
       const currentTime = await getCurrentTime()
+      console.log('test1')
 
       const next = await sales.methods.next(numToBytes32(loanId)).call()
+      console.log('test2')
       const saleIndex = await sales.methods.saleIndexByLoan(numToBytes32(loanId), parseInt(next) - 1).call()
+      console.log('test3')
       const settlementExpiration = await sales.methods.settlementExpiration(saleIndex)
+      console.log('test4')
 
       if (parseInt(next) < 3 && currentTime > parseInt(settlementExpiration)) {
         loanModel.status = 'LIQUIDATING'
