@@ -43,8 +43,11 @@ function defineLoanStatusJobs (agenda) {
 
         if (ethBalance > 0) {
           const medianBtcPrice = await getMedianBtcPrice()
+          console.log('approveTokens start')
           await approveTokens(loanMarket, agenda)
+          console.log('checkLoans start')
           await checkLoans(loanMarket, agenda, medianBtcPrice)
+          console.log('checkSales start')
           await checkSales(loanMarket, agenda, medianBtcPrice)
         }
       }
@@ -68,6 +71,8 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
   const currentTime = await getCurrentTime()
 
   const loanModels = await Loan.find({ principal, status: { $nin: ['QUOTE', 'REQUESTING', 'CANCELLING', 'CANCELLED', 'ACCEPTING', 'ACCEPTED', 'LIQUIDATING', 'LIQUIDATED', 'FAILED'] } }).exec()
+
+  console.log('checkLoans test1')
 
   for (let i = 0; i < loanModels.length; i++) {
     const loanModel = loanModels[i]
@@ -248,8 +253,12 @@ async function approveTokens (loanMarket, agenda) {
   const token = getObject('erc20', principal)
   const loansAddress = getContract('loans', principal)
 
+  console.log('approveTokens test1')
+
   const allowance = await token.methods.allowance(principalAddress, loansAddress).call()
   const approve = await Approve.findOne({ principal, status: { $nin: ['FAILED'] } }).exec()
+
+  console.log('approveTokens test2')
 
   if (parseInt(allowance) === 0 || !approve) {
     await agenda.schedule(getInterval('ACTION_INTERVAL'), 'approve-tokens', { loanMarketModelId: loanMarket.id })
