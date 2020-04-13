@@ -113,6 +113,27 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
         }
       }
     } else if (sale) {
+      console.log('Loan ID', loanId)
+      const currentTime = await getCurrentTime()
+
+      const sales = getObject('sales', principal)
+
+      const next = await sales.methods.next(numToBytes32(loanId)).call()
+      const saleIndex = await sales.methods.saleIndexByLoan(numToBytes32(loanId), parseInt(next) - 1).call()
+      const settlementExpiration = await sales.methods.settlementExpiration(saleIndex).call()
+
+      console.log('parseInt(next)', parseInt(next))
+      console.log('currentTime', currentTime)
+      console.log('parseInt(settlementExpiration)', parseInt(settlementExpiration))
+      console.log('parseInt(next) < 3 && currentTime > parseInt(settlementExpiration)', parseInt(next) < 3 && currentTime > parseInt(settlementExpiration))
+
+      if (parseInt(next) < 3 && currentTime > parseInt(settlementExpiration)) {
+        loanModel.status = 'LIQUIDATING'
+        await loanModel.save()
+
+        agenda.now('liquidate-loan', { loanModelId: loanModel.id })
+      }
+
       // TODO: CHECK IF FIRST LIQUIDATION FAILED
     } else {
       loanModel.status = 'ACCEPTED'
