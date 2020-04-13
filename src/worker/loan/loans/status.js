@@ -116,6 +116,8 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
       const currentTime = await getCurrentTime()
       console.log('test1')
 
+      const sales = getObject('sales', principal)
+
       const next = await sales.methods.next(numToBytes32(loanId)).call()
       console.log('test2')
       const saleIndex = await sales.methods.saleIndexByLoan(numToBytes32(loanId), parseInt(next) - 1).call()
