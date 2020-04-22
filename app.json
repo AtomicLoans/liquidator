@@ -40,7 +40,7 @@
     },
     "DASH_PASS": {
       "description": "Jobs Dashboard Password",
-      "required": true
+      "generator": "secret"
     },
     "BUGSNAG_API": {
       "description": "Error monitoring",
