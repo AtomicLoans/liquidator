@@ -6,10 +6,8 @@ const { currencies } = require('../../../../utils/fx')
 const { getEthSigner } = require('../../../../utils/address')
 const LoanMarket = require('../../../../models/LoanMarket')
 const Withdraw = require('../../../../models/Withdraw')
-const { setTxParams, bumpTxFee, sendTransaction } = require('../../../../worker/loan/utils/web3Transaction')
-const { getInterval } = require('../../../../utils/intervals')
+const { setTxParams, sendTransaction } = require('../../../../worker/loan/utils/web3Transaction')
 const handleError = require('../../../../utils/handleError')
-const { sleep } = require('@liquality/utils')
 const { getObject, getContract } = require('../../../../utils/contracts')
 
 function defineWithdrawRoutes (router) {
@@ -66,8 +64,6 @@ function defineWithdrawRoutes (router) {
         await withdrawModel.save()
 
         await sendTransaction(ethTx, withdrawModel, agenda, done, txSuccess, txFailure)
-
-
       }
     }
 

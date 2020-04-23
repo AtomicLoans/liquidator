@@ -1,18 +1,9 @@
-const axios = require('axios')
-const { sha256 } = require('@liquality/crypto')
-const compareVersions = require('compare-versions')
 const Sale = require('../../../models/Sale')
 const Loan = require('../../../models/Loan')
 const LoanMarket = require('../../../models/LoanMarket')
 const Secret = require('../../../models/Secret')
 const { numToBytes32 } = require('../../../utils/finance')
-const { getObject } = require('../../../utils/contracts')
-const { getInterval } = require('../../../utils/intervals')
-const { getLockArgs } = require('../utils/collateral')
 const { getInitArgs } = require('../utils/collateralSwap')
-const { isArbiter } = require('../../../utils/env')
-const { getEndpoint } = require('../../../utils/endpoints')
-const handleError = require('../../../utils/handleError')
 const { remove0x } = require('@liquality/ethereum-utils')
 
 function defineSalesClaimJobs (agenda) {

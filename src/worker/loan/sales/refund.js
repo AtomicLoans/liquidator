@@ -1,4 +1,3 @@
-const Loan = require('../../../models/Loan')
 const Sale = require('../../../models/Sale')
 const EthTx = require('../../../models/EthTx')
 const LoanMarket = require('../../../models/LoanMarket')

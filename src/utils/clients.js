@@ -16,10 +16,8 @@ const BitcoinSwapProvider = require('@liquality/bitcoin-swap-provider')
 const BitcoinCollateralProvider = require('@atomicloans/bitcoin-collateral-provider')
 const BitcoinCollateralSwapProvider = require('@atomicloans/bitcoin-collateral-swap-provider')
 const BitcoinNetworks = require('@liquality/bitcoin-networks')
-const EthereumNetworks = require('@liquality/ethereum-networks')
 
 const EthereumRpcProvider = require('@liquality/ethereum-rpc-provider')
-const EthereumJsWalletProvider = require('@liquality/ethereum-js-wallet-provider')
 const EthereumSwapProvider = require('@liquality/ethereum-swap-provider')
 const EthereumErc20Provider = require('@liquality/ethereum-erc20-provider')
 

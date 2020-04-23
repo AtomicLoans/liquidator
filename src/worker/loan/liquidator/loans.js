@@ -1,4 +1,3 @@
-const { checksumEncode } = require('@liquality/ethereum-utils')
 const BN = require('bignumber.js')
 
 const Loan = require('../../../models/Loan')
@@ -32,7 +31,6 @@ function defineLiquidatorLoanJobs (agenda) {
     if (!loanMarket) return console.log('Error: LoanMarket not found')
 
     const { principal, collateral } = loanMarket
-    const { principalAddress } = await loanMarket.getAgentAddresses()
 
     const market = await Market.findOne({ from: collateral, to: principal }).exec()
     if (!market) return console.log('Error: Market not found')
@@ -52,7 +50,7 @@ function defineLiquidatorLoanJobs (agenda) {
       ])
 
       const { approved, withdrawn, sale, paid, off } = bools
-      const { loanExpiration, arbiter, borrower, lender } = loans
+      const { loanExpiration, borrower, lender } = loans
 
       const currentTime = await getCurrentTime()
 
