@@ -1,12 +1,11 @@
 const Client = require('@liquality/client')
 const LoanClient = require('@atomicloans/loan-client')
-const { isArbiter } = require('./env')
 const { contractAddresses, bitcoinNetworks } = require('../networks/index')
 
 const {
   BTC_RPC, BTC_USER, BTC_PASS, BTC_API,
   ETH_RPC, ETH_USER, ETH_PASS,
-  NETWORK, MNEMONIC, MNEMONIC_ARBITER
+  NETWORK, MNEMONIC
 } = process.env
 
 const BitcoinRpcProvider = require('@liquality/bitcoin-rpc-provider')
@@ -33,7 +32,7 @@ if (BTC_RPC) {
 if (NETWORK !== 'test') {
   BTC.addProvider(new BitcoinEsploraApiProvider(BTC_API))
 }
-BTC.addProvider(new BitcoinJsWalletProvider(BitcoinNetworks[bitcoinNetwork], isArbiter() ? MNEMONIC_ARBITER : MNEMONIC, 'bech32'))
+BTC.addProvider(new BitcoinJsWalletProvider(BitcoinNetworks[bitcoinNetwork], MNEMONIC, 'bech32'))
 BTC.addProvider(new BitcoinSwapProvider({ network: BitcoinNetworks[bitcoinNetwork] }))
 BTC.loan.addProvider(new BitcoinCollateralProvider({ network: BitcoinNetworks[bitcoinNetwork] }))
 BTC.loan.addProvider(new BitcoinCollateralSwapProvider({ network: BitcoinNetworks[bitcoinNetwork] }))

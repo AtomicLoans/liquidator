@@ -90,6 +90,8 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
 
         const safe = await loans.methods.safe(numToBytes32(loanId)).call()
 
+        console.log('safe', safe)
+
         if (safe) {
           // update oracles
 
@@ -165,23 +167,25 @@ async function checkSales (loanMarket, agenda, medianBtcPrice) {
 
     if (process.env.NODE_ENV === 'test') {
       const initUtxos = await saleModel.collateralClient().getMethod('jsonrpc')('listunspent', 1, 999999, [collateralSwapRefundableP2SHAddress])
-      const initUtxo = initUtxos[0]
-      const { txid: initTxHash } = initUtxo
+      if (initUtxos.length > 0) {
+        const initUtxo = initUtxos[0]
+        const { txid: initTxHash } = initUtxo
 
-      const { secretB, secretC } = await sales.methods.secretHashes(numToBytes32(saleId)).call()
+        const { secretB, secretC } = await sales.methods.secretHashes(numToBytes32(saleId)).call()
 
-      console.log('initTxHash', initTxHash)
-      console.log('secretB', secretB)
-      console.log('secretC', secretC)
+        console.log('initTxHash', initTxHash)
+        console.log('secretB', secretB)
+        console.log('secretC', secretC)
 
-      saleModel.secretB = secretB
-      saleModel.secretC = secretC
-      saleModel.initTxHash = initTxHash
-      saleModel.status = 'SECRETS_PROVIDED'
+        saleModel.secretB = secretB
+        saleModel.secretC = secretC
+        saleModel.initTxHash = initTxHash
+        saleModel.status = 'SECRETS_PROVIDED'
 
-      await saleModel.save()
+        await saleModel.save()
 
-      agenda.now('claim-collateral', { saleModelId: saleModel.id })
+        agenda.now('claim-collateral', { saleModelId: saleModel.id })
+      }
     } else {
       // check arbiter / lender agent endpoint
 

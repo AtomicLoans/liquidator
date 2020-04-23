@@ -27,8 +27,6 @@ if (RUN_SINGLE_PROCESS || (HEROKU_APP !== undefined && HEROKU_APP !== 'undefined
   require('../worker/index')
 }
 
-const bugsnagClient = bugsnag(BUGSNAG_API)
-
 let agenda
 if (PARTY !== 'arbiter') {
   agenda = new Agenda({ db: { address: MONGODB_URI } })
@@ -40,10 +38,14 @@ migrate()
 
 const app = express()
 
-bugsnagClient.use(bugsnagExpress)
-const middleware = bugsnagClient.getPlugin('express')
+let middleware
+if (BUGSNAG_API) {
+  const bugsnagClient = bugsnag(BUGSNAG_API)
+  bugsnagClient.use(bugsnagExpress)
+  middleware = bugsnagClient.getPlugin('express')
 
-app.use(middleware.requestHandler)
+  app.use(middleware.requestHandler)
+}
 
 let dashPass
 if (process.env.NODE_ENV === 'production') {
@@ -92,6 +94,8 @@ if (NODE_ENV === 'production') {
 
 app.use(handleError())
 
-app.use(middleware.errorHandler)
+if (BUGSNAG_API) {
+  app.use(middleware.errorHandler)
+}
 
 app.listen(PORT)

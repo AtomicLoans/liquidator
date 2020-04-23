@@ -16,14 +16,14 @@ before_script:
   - yarn global add ganache-cli
   - mkdir -p /home/travis/.bitcoin && cp bitcoin.conf /home/travis/.bitcoin/bitcoin.conf
   - ./bitcoin-0.17.1/bin/bitcoind -reindex -txindex -regtest -daemon -rpcport=18443 -rpcuser=bitcoin -rpcpassword=local321 -deprecatedrpc=signrawtransaction
-  - CI=false ganache-cli -k petersburg > /dev/null &
+  - CI=false ganache-cli > /dev/null &
   - export NODE_OPTIONS="--max-old-space-size=8192"
   - cp .env.example .env
   - cp test/env/.env.test.example test/env/.env.test
   - CI=false npm run setup:test_json
   - CI=false npm run deploy:contracts
   - CI=false npm run liquidator:test &
-  - sleep 30
+  - sleep 60
 
 jobs:
   include:
@@ -32,4 +32,3 @@ jobs:
         - CI=false npm run lint
         - CI=false npm run test:liquidator:liquidate
         - CI=false npm run test:liquidator:refund
-        - CI=false npm run coverage

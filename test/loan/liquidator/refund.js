@@ -184,6 +184,8 @@ function testRefund () {
 
       await fundTokens(liquidator, discountBuy, principal)
 
+      await medianizer.methods.poke(numToBytes32(toWei((parseInt(btcPrice) * 0.7).toString(), 'ether'))).send({ gas: 2000000 })
+
       await checkLoanLiquidated(loanId, principal)
 
       const saleIndexAfter = await lenderSales.methods.saleIndex().call()

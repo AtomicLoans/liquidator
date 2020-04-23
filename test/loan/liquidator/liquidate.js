@@ -90,9 +90,9 @@ function testLiquidation () {
 
       const [lenderFunds, lenderLoans, lenderSales, lenderToken] = await getTestObjects(lenderWeb3Chain, principal, ['funds', 'loans', 'sales', 'erc20'])
 
-      const [arbiterFunds, arbiterSales] = await getTestObjects(arbiterWeb3Chain, principal, ['funds', 'loans', 'sales', 'erc20'])
+      const [arbiterFunds, arbiterSales] = await getTestObjects(arbiterWeb3Chain, principal, ['funds', 'sales'])
 
-      const [borrowerLoans] = await getTestObjects(borrowerWeb3Chain, principal, ['loans', 'sales', 'erc20'])
+      const [borrowerLoans] = await getTestObjects(borrowerWeb3Chain, principal, ['loans'])
 
       const { address: ethereumWithNodeAddress } = await chains.ethereumWithNode.client.wallet.getUnusedAddress()
       const medianizer = await testLoadObject('medianizer', getTestContract('medianizer', principal), chains.web3WithNode, ensure0x(ethereumWithNodeAddress))
@@ -186,6 +186,8 @@ function testLiquidation () {
 
       const saleIndexBefore = await lenderSales.methods.saleIndex().call()
 
+      await medianizer.methods.poke(numToBytes32(toWei((parseInt(btcPrice) * 0.7).toString(), 'ether'))).send({ gas: 2000000 })
+
       await checkLoanLiquidated(loanId, principal)
 
       const saleIndexAfter = await lenderSales.methods.saleIndex().call()
@@ -216,12 +218,13 @@ function testLiquidation () {
 
       console.log('lockSwapAddresses', lockSwapAddresses)
 
-      // const swapParams = [colParams.pubKeys, swapSecretHashes, colParams.expirations]
-      // const lockAddresses = await bitcoin.client.loan.collateralSwap.getInitAddresses(...swapParams)
-
       await importBitcoinAddressesByAddress([lockSwapAddresses.refundableAddress, lockSwapAddresses.seizableAddress])
 
-      const outputs = [{ address: lockSwapAddresses.refundableAddress }, { address: lockSwapAddresses.seizableAddress }]
+      const colBalances = await borrowerBtcChain.client.chain.getBalance([refundableAddress, seizableAddress])
+
+      const value = Math.floor((colBalances.toNumber() - 15288) / 2)
+
+      const outputs = [{ address: lockSwapAddresses.refundableAddress, value }, { address: lockSwapAddresses.seizableAddress, value }]
 
       const multisigBorrowerParams = [lockTxHash, lockParams[1], lockParams[2], lockParams[3], 'borrower', outputs]
       const borrowerSigs = await borrowerBtcChain.client.loan.collateral.multisigSign(...multisigBorrowerParams)
