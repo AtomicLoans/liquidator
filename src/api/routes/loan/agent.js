@@ -54,15 +54,20 @@ function defineAgentRoutes (router) {
     res.json(agentAddresses)
   }))
 
-  router.get('/agentinfo/balance/btc', asyncHandler(async (req, res) => {
-    const loanMarket = await LoanMarket.findOne().exec()
+  router.get('/agentinfo/balance/btc', asyncHandler(async (req, res, next) => {
+    console.log('/agentinfo/balance/btc')
+    try {
+      const loanMarket = await LoanMarket.findOne().exec()
 
-    const usedAddresses = await loanMarket.collateralClient().wallet.getUsedAddresses()
-    const unusedAddress = await loanMarket.collateralClient().wallet.getUnusedAddress()
+      const usedAddresses = await loanMarket.collateralClient().wallet.getUsedAddresses()
+      const unusedAddress = await loanMarket.collateralClient().wallet.getUnusedAddress()
 
-    const balance = await loanMarket.collateralClient().chain.getBalance(usedAddresses)
+      const balance = await loanMarket.collateralClient().chain.getBalance(usedAddresses)
 
-    res.json({ btcBalance: BN(balance).dividedBy(currencies.BTC.multiplier).toFixed(8), unusedAddress, usedAddresses })
+      res.json({ btcBalance: BN(balance).dividedBy(currencies.BTC.multiplier).toFixed(8), unusedAddress, usedAddresses })
+    } catch(e) {
+      return next(res.createError(500, `Error: ${e}`))
+    }
   }))
 
   router.post('/backupseedphrase', asyncHandler(async (req, res, next) => {
