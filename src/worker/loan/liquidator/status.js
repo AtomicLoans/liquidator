@@ -1,6 +1,5 @@
 const LoanMarket = require('../../../models/LoanMarket')
 const { getObject } = require('../../../utils/contracts')
-const { getInterval } = require('../../../utils/intervals')
 
 function defineLiquidatorStatusJobs (agenda) {
   agenda.define('check-liquidator-status', async (job, done) => {

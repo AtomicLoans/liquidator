@@ -239,36 +239,36 @@ class App extends React.Component {
           <div className='text-center thin homedashboard'>
             <h1>Dashboard</h1>
 
-              <br/>
-              <br/>
+            <br />
+            <br />
 
-              <h2>Ethereum</h2>
+            <h2>Ethereum</h2>
 
-            <p id="liquidator-address">0x</p>
-            <table className="MuiTable-root" style={{ margin: '10px auto' }}>
-              <thead className="MuiTableHead-root">
-                <tr className="MuiTableRow-root jss162 MuiTableRow-head jss163">
-                  <th className="MuiTableCell-root MuiTableCell-head jss169" scope="col">Asset</th>
-                  <th className="MuiTableCell-root MuiTableCell-head jss169 MuiTableCell-alignCenter" scope="col">Balance</th>
+            <p id='liquidator-address'>0x</p>
+            <table className='MuiTable-root' style={{ margin: '10px auto' }}>
+              <thead className='MuiTableHead-root'>
+                <tr className='MuiTableRow-root jss162 MuiTableRow-head jss163'>
+                  <th className='MuiTableCell-root MuiTableCell-head jss169' scope='col'>Asset</th>
+                  <th className='MuiTableCell-root MuiTableCell-head jss169 MuiTableCell-alignCenter' scope='col'>Balance</th>
                 </tr>
               </thead>
-              <tbody className="MuiTableBody-root">
-                <tr className="MuiTableRow-root jss162">
-                  <th className="MuiTableCell-root MuiTableCell-body jss170" scope="row">USDC</th>
-                  <td className="MuiTableCell-root MuiTableCell-body jss170 MuiTableCell-alignCenter" id="usdc-amount">0.00</td>
+              <tbody className='MuiTableBody-root'>
+                <tr className='MuiTableRow-root jss162'>
+                  <th className='MuiTableCell-root MuiTableCell-body jss170' scope='row'>USDC</th>
+                  <td className='MuiTableCell-root MuiTableCell-body jss170 MuiTableCell-alignCenter' id='usdc-amount'>0.00</td>
                 </tr>
-                <tr className="MuiTableRow-root jss162">
-                  <th className="MuiTableCell-root MuiTableCell-body jss170" scope="row">DAI</th>
-                  <td className="MuiTableCell-root MuiTableCell-body jss170 MuiTableCell-alignCenter" id="dai-amount">0.00</td>
+                <tr className='MuiTableRow-root jss162'>
+                  <th className='MuiTableCell-root MuiTableCell-body jss170' scope='row'>DAI</th>
+                  <td className='MuiTableCell-root MuiTableCell-body jss170 MuiTableCell-alignCenter' id='dai-amount'>0.00</td>
                 </tr>
-                <tr className="MuiTableRow-root jss162">
-                  <th className="MuiTableCell-root MuiTableCell-body jss170" scope="row">ETH</th>
-                  <td className="MuiTableCell-root MuiTableCell-body jss170 MuiTableCell-alignCenter" id="eth-amount">0.00</td>
+                <tr className='MuiTableRow-root jss162'>
+                  <th className='MuiTableCell-root MuiTableCell-body jss170' scope='row'>ETH</th>
+                  <td className='MuiTableCell-root MuiTableCell-body jss170 MuiTableCell-alignCenter' id='eth-amount'>0.00</td>
                 </tr>
               </tbody>
             </table>
 
-            <br/>
+            <br />
 
             <p>Withdraw USDC</p>
             <div className='field'>
@@ -276,7 +276,7 @@ class App extends React.Component {
               <input placeholder='100' label='USDC Amount' value='' id='usdc-withdraw-amount' />
               <div className='field_aside click theme1' id='submit-usdc'>Withdraw</div>
             </div>
-            <p id='usdc-withdraw-hash'></p>
+            <p id='usdc-withdraw-hash' />
 
             <p>Withdraw DAI</p>
             <div className='field'>
@@ -284,7 +284,7 @@ class App extends React.Component {
               <input placeholder='100' label='DAI Amount' value='' id='dai-withdraw-amount' />
               <div className='field_aside click theme1' id='submit-dai'>Withdraw</div>
             </div>
-            <p id='dai-withdraw-hash'></p>
+            <p id='dai-withdraw-hash' />
 
             <p>Withdraw ETH</p>
             <div className='field'>
@@ -292,30 +292,30 @@ class App extends React.Component {
               <input placeholder='2.3' label='2.3' value='' id='eth-withdraw-amount' />
               <div className='field_aside click theme1' id='submit-eth'>Withdraw</div>
             </div>
-            <p id='eth-withdraw-hash'></p>
+            <p id='eth-withdraw-hash' />
 
-            <br/>
-            <br/>
+            <br />
+            <br />
 
             <h2>Bitcoin</h2>
 
-            <p id="liquidator-btc-receive-address"></p>
-            <table className="MuiTable-root" style={{ margin: '10px auto' }}>
-              <thead className="MuiTableHead-root">
-                <tr className="MuiTableRow-root jss162 MuiTableRow-head jss163">
-                  <th className="MuiTableCell-root MuiTableCell-head jss169" scope="col">Asset</th>
-                  <th className="MuiTableCell-root MuiTableCell-head jss169 MuiTableCell-alignCenter" scope="col">Balance</th>
+            <p id='liquidator-btc-receive-address' />
+            <table className='MuiTable-root' style={{ margin: '10px auto' }}>
+              <thead className='MuiTableHead-root'>
+                <tr className='MuiTableRow-root jss162 MuiTableRow-head jss163'>
+                  <th className='MuiTableCell-root MuiTableCell-head jss169' scope='col'>Asset</th>
+                  <th className='MuiTableCell-root MuiTableCell-head jss169 MuiTableCell-alignCenter' scope='col'>Balance</th>
                 </tr>
               </thead>
-              <tbody className="MuiTableBody-root">
-                <tr className="MuiTableRow-root jss162">
-                  <th className="MuiTableCell-root MuiTableCell-body jss170" scope="row">BTC</th>
-                  <td className="MuiTableCell-root MuiTableCell-body jss170 MuiTableCell-alignCenter" id="btc-amount">0.00</td>
+              <tbody className='MuiTableBody-root'>
+                <tr className='MuiTableRow-root jss162'>
+                  <th className='MuiTableCell-root MuiTableCell-body jss170' scope='row'>BTC</th>
+                  <td className='MuiTableCell-root MuiTableCell-body jss170 MuiTableCell-alignCenter' id='btc-amount'>0.00</td>
                 </tr>
               </tbody>
             </table>
 
-            <br/>
+            <br />
 
             <p>Withdraw BTC</p>
             <div className='field'>
@@ -326,7 +326,7 @@ class App extends React.Component {
               <input placeholder='0.88' label='0.88' value='' id='btc-withdraw-amount' />
               <div className='field_aside click theme1' id='submit-btc'>Withdraw</div>
             </div>
-            <p id='btc-withdraw-hash'></p>
+            <p id='btc-withdraw-hash' />
 
             <br />
             <br />

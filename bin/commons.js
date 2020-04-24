@@ -73,10 +73,6 @@ module.exports.loadVariables = (config = {}) => {
   process.env.PROCESS_TYPE = config.processType
 
   loadMnemonic('MNEMONIC')
-
-  if (process.env.PARTY === 'arbiter') {
-    loadMnemonic('MNEMONIC_ARBITER')
-  }
 }
 
 function loadMnemonic (envKey) {

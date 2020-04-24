@@ -2,12 +2,11 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 
-const { MONGODB_ARBITER_URI, MONGODB_URI } = process.env
-const { isArbiter } = require('./src/utils/env')
+const { MONGODB_URI } = process.env
 
 const regex = new RegExp(`\/([A-Z0-9a-z\_])*$`, 'g') // eslint-disable-line
 
-const mongodbURI = isArbiter() ? MONGODB_ARBITER_URI : MONGODB_URI
+const mongodbURI = MONGODB_URI
 
 const mongoUrl = mongodbURI.replace(regex, '')
 const mongoDBName = mongodbURI.replace(mongoUrl, '').replace('/', '')

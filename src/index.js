@@ -2,7 +2,7 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 
-const { MONGOOSE_DEBUG, MONGODB_ARBITER_URI, MONGODB_URI, HEROKU_APP, NODE_ENV, MNEMONIC, MNEMONIC_ARBITER, PARTY } = process.env
+const { MONGOOSE_DEBUG, MONGODB_ARBITER_URI, MONGODB_URI, HEROKU_APP, NODE_ENV, MNEMONIC } = process.env
 
 const { isArbiter, rewriteEnv } = require('./utils/env')
 const mongoose = require('mongoose')
@@ -45,22 +45,12 @@ async function start () {
   }
 
   if (NODE_ENV === 'test') {
-    if (PARTY === 'arbiter') {
-      if (MNEMONIC_ARBITER === 'undefined' || MNEMONIC_ARBITER === undefined || MNEMONIC_ARBITER === '') {
-        const mnemonic = generateMnemonic(128)
-        rewriteEnv('.env', 'MNEMONIC_ARBITER', `"${mnemonic}"`)
-        process.env.MNEMONIC_ARBITER = mnemonic
-      } else if (isCI) {
-        rewriteEnv('.env', 'MNEMONIC_ARBITER', `"${MNEMONIC_ARBITER}"`)
-      }
-    } else if (PARTY === 'lender') {
-      if (MNEMONIC === 'undefined' || MNEMONIC === undefined || MNEMONIC === '') {
-        const mnemonic = generateMnemonic(128)
-        rewriteEnv('.env', 'MNEMONIC', `"${mnemonic}"`)
-        process.env.MNEMONIC = mnemonic
-      } else if (isCI) {
-        rewriteEnv('.env', 'MNEMONIC', `"${MNEMONIC}"`)
-      }
+    if (MNEMONIC === 'undefined' || MNEMONIC === undefined || MNEMONIC === '') {
+      const mnemonic = generateMnemonic(128)
+      rewriteEnv('.env', 'MNEMONIC', `"${mnemonic}"`)
+      process.env.MNEMONIC = mnemonic
+    } else if (isCI) {
+      rewriteEnv('.env', 'MNEMONIC', `"${MNEMONIC}"`)
     }
   }
 
