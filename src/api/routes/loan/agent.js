@@ -59,15 +59,11 @@ function defineAgentRoutes (router) {
     console.log('/agentinfo/balance/btc')
     try {
       const loanMarket = await LoanMarket.findOne().exec()
-      console.log('loanMarket', loanMarket)
 
       const usedAddresses = await loanMarket.collateralClient().wallet.getUsedAddresses()
       const unusedAddress = await loanMarket.collateralClient().wallet.getUnusedAddress()
-      console.log('usedAddresses', usedAddresses)
-      console.log('unusedAddress', unusedAddress)
 
       const balance = await loanMarket.collateralClient().chain.getBalance(usedAddresses)
-      console.log('balance', balance)
 
       res.json({ btcBalance: BN(balance).dividedBy(currencies.BTC.multiplier).toFixed(8), unusedAddress, usedAddresses })
     } catch(e) {
