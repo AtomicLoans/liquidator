@@ -22,7 +22,7 @@ function defineLiquidatorStatusJobs (agenda) {
         }
       }
     } catch(e) {
-      console.log(`Error: ${e}`)
+      console.log(e)
       handleError(e)
     }
     done()
