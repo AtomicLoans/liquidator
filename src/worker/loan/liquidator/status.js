@@ -21,7 +21,7 @@ function defineLiquidatorStatusJobs (agenda) {
           agenda.now('update-loan-records', { loanMarketId: loanMarket.id })
         }
       }
-    } catch(e) {
+    } catch (e) {
       console.log(e)
       handleError(e)
     }

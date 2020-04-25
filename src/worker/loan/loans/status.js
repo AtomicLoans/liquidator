@@ -52,6 +52,9 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
   const { principal, collateral } = loanMarket
 
   const loans = getObject('loans', principal)
+  const token = getObject('erc20', principal)
+
+  const principalAddress = await (web3().currentProvider.getAddresses())[0]
 
   const currentTime = await getCurrentTime()
 
@@ -77,30 +80,40 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
       const minCollateralValue = fromWei(minCollateralValueInUnits, 'ether')
       console.log('minCollateralValue', minCollateralValue)
 
-      if (currentTime > loanExpiration) {
-        console.log('DEFAULTED')
+      const discountCollateralValue = await loans.methods.ddiv(await loans.methods.discountCollateralValue(numToBytes32(loanId)).call()).call()
+      console.log('discountCollateralValue', discountCollateralValue)
 
-        loanModel.status = 'LIQUIDATING'
-        await loanModel.save()
+      const tokenBalance = await token.methods.balanceOf(principalAddress).call()
+      console.log('tokenBalance', tokenBalance)
 
-        agenda.now('liquidate-loan', { loanModelId: loanModel.id })
-      } else if (BN(collateralValue).isLessThan(minCollateralValue)) {
-        console.log('!SAFE')
-        console.log('LIQUIDATE')
+      console.log('principal', principal)
 
-        const safe = await loans.methods.safe(numToBytes32(loanId)).call()
+      if (tokenBalance >= discountCollateralValue) {
+        if (currentTime > loanExpiration) {
+          console.log('DEFAULTED')
 
-        console.log('safe', safe)
-
-        if (safe) {
-          // update oracles
-
-          // agenda.now('check-liquidator-oracle')
-        } else {
           loanModel.status = 'LIQUIDATING'
           await loanModel.save()
 
           agenda.now('liquidate-loan', { loanModelId: loanModel.id })
+        } else if (BN(collateralValue).isLessThan(minCollateralValue)) {
+          console.log('!SAFE')
+          console.log('LIQUIDATE')
+
+          const safe = await loans.methods.safe(numToBytes32(loanId)).call()
+
+          console.log('safe', safe)
+
+          if (safe) {
+            // update oracles
+
+            // agenda.now('check-liquidator-oracle')
+          } else {
+            loanModel.status = 'LIQUIDATING'
+            await loanModel.save()
+
+            agenda.now('liquidate-loan', { loanModelId: loanModel.id })
+          }
         }
       }
     } else if (sale) {
