@@ -26,9 +26,7 @@ const bitcoinNetwork = bitcoinNetworks(NETWORK).NETWORK
 const BTC = new Client()
 const BTCLoan = new LoanClient(BTC)
 BTC.loan = BTCLoan
-if (BTC_RPC) {
-  BTC.addProvider(new BitcoinRpcProvider(BTC_RPC, BTC_USER, BTC_PASS))
-}
+BTC.addProvider(new BitcoinRpcProvider(BTC_RPC, BTC_USER, BTC_PASS))
 if (NETWORK !== 'test') {
   BTC.addProvider(new BitcoinEsploraApiProvider(BTC_API))
 }
