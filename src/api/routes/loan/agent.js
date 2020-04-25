@@ -66,7 +66,7 @@ function defineAgentRoutes (router) {
       const balance = await loanMarket.collateralClient().chain.getBalance(usedAddresses)
 
       res.json({ btcBalance: BN(balance).dividedBy(currencies.BTC.multiplier).toFixed(8), unusedAddress, usedAddresses })
-    } catch(e) {
+    } catch (e) {
       return next(res.createError(500, e))
     }
   }))
