@@ -11,7 +11,7 @@ const BN = require('bignumber.js')
 const ncp = require('ncp').ncp
 ncp.limit = 16
 
-const { HEROKU_APP } = process.env
+const { HEROKU_APP, NETWORK } = process.env
 
 function defineAgentRoutes (router) {
   router.get('/loanmarketinfo', asyncHandler(async (req, res) => {
@@ -50,6 +50,7 @@ function defineAgentRoutes (router) {
     const loanMarket = await LoanMarket.findOne({ principal, collateral }).exec()
 
     const agentAddresses = await loanMarket.getAgentAddresses()
+    agentAddresses.network = NETWORK
 
     res.json(agentAddresses)
   }))
@@ -58,15 +59,11 @@ function defineAgentRoutes (router) {
     console.log('/agentinfo/balance/btc')
     try {
       const loanMarket = await LoanMarket.findOne().exec()
-      console.log('loanMarket', loanMarket)
 
       const usedAddresses = await loanMarket.collateralClient().wallet.getUsedAddresses()
       const unusedAddress = await loanMarket.collateralClient().wallet.getUnusedAddress()
-      console.log('usedAddresses', usedAddresses)
-      console.log('unusedAddress', unusedAddress)
 
       const balance = await loanMarket.collateralClient().chain.getBalance(usedAddresses)
-      console.log('balance', balance)
 
       res.json({ btcBalance: BN(balance).dividedBy(currencies.BTC.multiplier).toFixed(8), unusedAddress, usedAddresses })
     } catch(e) {
