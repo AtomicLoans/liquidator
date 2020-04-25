@@ -11,7 +11,7 @@ const BN = require('bignumber.js')
 const ncp = require('ncp').ncp
 ncp.limit = 16
 
-const { HEROKU_APP } = process.env
+const { HEROKU_APP, NETWORK } = process.env
 
 function defineAgentRoutes (router) {
   router.get('/loanmarketinfo', asyncHandler(async (req, res) => {
@@ -50,6 +50,7 @@ function defineAgentRoutes (router) {
     const loanMarket = await LoanMarket.findOne({ principal, collateral }).exec()
 
     const agentAddresses = await loanMarket.getAgentAddresses()
+    agentAddresses.network = NETWORK
 
     res.json(agentAddresses)
   }))
