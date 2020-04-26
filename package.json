@@ -1,6 +1,6 @@
 {
   "name": "atomic-liquidator",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Atomic Liquidator Agent",
   "main": "src/index.js",
   "scripts": {

@@ -1,3 +1,7 @@
+## [0.1.5](https://github.com/AtomicLoans/liquidator/compare/v0.1.4...v0.1.5) - 2020-04-26
+
+- fix liquidator status message
+
 ## [0.1.4](https://github.com/AtomicLoans/liquidator/compare/v0.1.3...v0.1.4) - 2020-04-26
 
 - fix linting issue
