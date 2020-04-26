@@ -1,21 +1,24 @@
-# 💥 Atomic Agent
+# 💥 Atomic Liquidator
 
-> Atomic Swap Agent
+> Atomic Loans Liquidator Agent
 
+## Run tests locally
 
-## Add test data
+Ensure you have `bitcoind`, `ganache-cli` and `mongod` running
 
 ```bash
-npm run migrate
+npm run setup:test_json
+npm run deploy:contracts
+npm run liquidator:test
 ```
-
 
 ## Run your Atomic Agent locally
 
 ```bash
-npm run api
-npm run worker # in a separate shell
+npm run liquidator
 ```
+
+You can also run it
 
 ## Deploy your own Atomic Agent
 

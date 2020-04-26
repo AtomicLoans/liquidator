@@ -1,3 +1,7 @@
+## [0.1.6](https://github.com/AtomicLoans/liquidator/compare/v0.1.5...v0.1.6) - 2020-04-26
+
+- update readme
+
 ## [0.1.5](https://github.com/AtomicLoans/liquidator/compare/v0.1.4...v0.1.5) - 2020-04-26
 
 - fix liquidator status message
