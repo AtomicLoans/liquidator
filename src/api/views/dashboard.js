@@ -315,8 +315,8 @@ class App extends React.Component {
             <h1>Dashboard</h1>
 
             <p id='liquidator-version'>Version 0.1.0</p>
-            <p id='liquidator-update' style={{ cursor: 'pointer', textDecoration: 'underline', color: '#e29ffd', fontWeight: 600 }}></p>
-            <p id='liquidator-status' />
+            <p id='liquidator-update' style={{ cursor: 'pointer', textDecoration: 'underline', color: '#e29ffd', fontWeight: 600 }}> </p>
+            <p id='liquidator-status'> </p>
 
             <br />
             <br />
