@@ -107,6 +107,9 @@ class App extends React.Component {
                                     const response = JSON.parse(xmlhttp.responseText)
                                     console.log('response', response)
 
+                                    if (response.message === 'success') {
+                                      document.getElementById('liquidator-status').innerHTML = "Updating... (refresh in 2 min)"
+                                    }
                                   } else if (xmlhttp.status !== 200) {
                                     alert('An error occured')
                                   }
@@ -312,7 +315,8 @@ class App extends React.Component {
             <h1>Dashboard</h1>
 
             <p id='liquidator-version'>Version 0.1.0</p>
-            <p><a href='#' id='liquidator-update'> </a></p>
+            <p id='liquidator-update' style={{ cursor: 'pointer', textDecoration: 'underline', color: '#e29ffd', fontWeight: 600 }}></p>
+            <p id='liquidator-status' />
 
             <br />
             <br />
