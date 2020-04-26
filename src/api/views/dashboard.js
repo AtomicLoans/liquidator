@@ -63,52 +63,50 @@ class App extends React.Component {
     
                     const daiERC20 = web3.eth.contract(erc20ABI).at(daiContractAddress)
 
-                    daiERC20.balanceOf(liquidatorAddress, function(err, daiBalance) {
-                      console.log('dai balance', web3.fromWei(daiBalance).toFixed(4))
-                      document.getElementById("dai-amount").innerHTML = web3.fromWei(daiBalance).toFixed(4)
+                    var xmlhttp = new XMLHttpRequest()
+                    var theUrl = "/api/loan/version"
+                    xmlhttp.open("GET", theUrl)
+                    xmlhttp.send()
+                    xmlhttp.onload = function() {
+                      if (xmlhttp.status === 200) {
+                        const response = JSON.parse(xmlhttp.responseText)
+                        const version = response.version
 
-                      const usdcERC20 = web3.eth.contract(erc20ABI).at(usdcContractAddress)
+                        var xmlhttpTwo = new XMLHttpRequest()
+                        var ghReleaseUrl = "https://api.github.com/repos/AtomicLoans/liquidator/releases/latest"
+                        xmlhttpTwo.open("GET", ghReleaseUrl)
+                        xmlhttpTwo.send()
+                        xmlhttpTwo.onload = function() {
+                          if (xmlhttpTwo.status === 200) {
+                            const responseTwo = JSON.parse(xmlhttpTwo.responseText)
+                            const ghVersion = responseTwo.name.replace('v', '')
 
-                      usdcERC20.balanceOf(liquidatorAddress, function(err, usdcBalance) {
-                        console.log('usdc balance', web3.fromWei(usdcBalance, 'mwei').toFixed(4))
-                        document.getElementById("usdc-amount").innerHTML = web3.fromWei(usdcBalance, 'mwei').toFixed(4)
+                            console.log('version', version)
+                            console.log('ghVersion', ghVersion)
 
-                        var xmlhttp = new XMLHttpRequest()
-                        var theUrl = "/api/loan/agentinfo/balance/btc"
-                        xmlhttp.open("GET", theUrl)
-                        xmlhttp.send()
-                        xmlhttp.onload = function() {
-                          if (xmlhttp.status === 200) {
-                            const response = JSON.parse(xmlhttp.responseText)
-                            const btcBalance = response.btcBalance
-                            console.log('btcBalance', btcBalance)
+                            console.log(version === ghVersion)
 
-                            document.getElementById("btc-amount").innerHTML = btcBalance
+                            document.getElementById("liquidator-version").innerHTML = "Version " + version
 
-                            // BTC Start
+                            if (version !== ghVersion) {
+                              document.getElementById("liquidator-update").innerHTML = "Update to Version " + ghVersion
+                            }
 
-                            document.getElementById('submit-btc').onclick = function() {
-                              var btcWithdrawAddress = document.getElementById("btc-address").value;
-                              console.log(btcWithdrawAddress)
-
+                            document.getElementById('liquidator-update').onclick = function() {
                               const currentTime = Math.floor(new Date().getTime() / 1000)
-                              const currency = 'BTC'
 
-                              const amount = document.getElementById('btc-withdraw-amount').value
-
-                              const address = web3.toChecksumAddress(res[0])
-                              const message = 'Withdraw ' + amount + ' ' + currency + ' to ' + btcWithdrawAddress + ' at ' + currentTime
+                              const message = 'Update Autopilot Agent at ' + currentTime
                               web3.personal.sign(message, address, (err, res) => {
                                 var xmlhttp = new XMLHttpRequest()
-                                var theUrl = "/api/loan/withdraw"
+                                var theUrl = "/api/loan/update"
                                 xmlhttp.open("POST", theUrl)
                                 xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8")
-                                xmlhttp.send(JSON.stringify({ "signature": res, "message": message, "timestamp": currentTime, "currency": "BTC", "amount": amount, "withdrawAddress": btcWithdrawAddress }))
+                                xmlhttp.send(JSON.stringify({ "signature": res, "message": message, "timestamp": currentTime }))
                                 xmlhttp.onload = function() {
                                   if (xmlhttp.status === 200) {
                                     const response = JSON.parse(xmlhttp.responseText)
                                     console.log('response', response)
-                                    document.getElementById('btc-withdraw-hash').innerHTML = '<a href="https://blockstream.info/tx/' + response.withdrawHash + '">https://blockstream.info/tx/' + response.withdrawHash + '</a>'
+
                                   } else if (xmlhttp.status !== 200) {
                                     alert('An error occured')
                                   }
@@ -116,120 +114,180 @@ class App extends React.Component {
                               })
                             }
 
-                            document.getElementById('btc-use-max').onclick = function() {
-                              document.getElementById('btc-withdraw-amount').value = parseFloat(btcBalance) - 0.005
-                            }
+                            daiERC20.balanceOf(liquidatorAddress, function(err, daiBalance) {
+                              console.log('dai balance', web3.fromWei(daiBalance).toFixed(4))
+                              document.getElementById("dai-amount").innerHTML = web3.fromWei(daiBalance).toFixed(4)
 
-                            // BTC Stop
+                              const usdcERC20 = web3.eth.contract(erc20ABI).at(usdcContractAddress)
 
-                            // ETH Start
+                              usdcERC20.balanceOf(liquidatorAddress, function(err, usdcBalance) {
+                                console.log('usdc balance', web3.fromWei(usdcBalance, 'mwei').toFixed(4))
+                                document.getElementById("usdc-amount").innerHTML = web3.fromWei(usdcBalance, 'mwei').toFixed(4)
 
-                            document.getElementById('submit-eth').onclick = function() {
-                              const currentTime = Math.floor(new Date().getTime() / 1000)
-                              const currency = 'ETH'
-
-                              const amount = document.getElementById('eth-withdraw-amount').value
-
-                              const address = web3.toChecksumAddress(res[0])
-                              const message = 'Withdraw ' + amount + ' ' + currency + ' to ' + address + ' at ' + currentTime
-                              web3.personal.sign(message, address, (err, res) => {
                                 var xmlhttp = new XMLHttpRequest()
-                                var theUrl = "/api/loan/withdraw"
-                                xmlhttp.open("POST", theUrl)
-                                xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8")
-                                xmlhttp.send(JSON.stringify({ "signature": res, "message": message, "timestamp": currentTime, "currency": "ETH", "amount": amount }))
+                                var theUrl = "/api/loan/agentinfo/balance/btc"
+                                xmlhttp.open("GET", theUrl)
+                                xmlhttp.send()
                                 xmlhttp.onload = function() {
                                   if (xmlhttp.status === 200) {
                                     const response = JSON.parse(xmlhttp.responseText)
-                                    console.log('response', response)
-                                    document.getElementById('eth-withdraw-hash').innerHTML = '<a href="https://etherscan.io/address/' + liquidatorAddress + '" target="_blank">https://etherscan.io/address/' + liquidatorAddress + '</a>'
-                                  } else if (xmlhttp.status !== 200) {
+                                    const btcBalance = response.btcBalance
+                                    console.log('btcBalance', btcBalance)
+
+                                    document.getElementById("btc-amount").innerHTML = btcBalance
+
+                                    // BTC Start
+
+                                    document.getElementById('submit-btc').onclick = function() {
+                                      var btcWithdrawAddress = document.getElementById("btc-address").value;
+                                      console.log(btcWithdrawAddress)
+
+                                      const currentTime = Math.floor(new Date().getTime() / 1000)
+                                      const currency = 'BTC'
+
+                                      const amount = document.getElementById('btc-withdraw-amount').value
+
+                                      const address = web3.toChecksumAddress(res[0])
+                                      const message = 'Withdraw ' + amount + ' ' + currency + ' to ' + btcWithdrawAddress + ' at ' + currentTime
+                                      web3.personal.sign(message, address, (err, res) => {
+                                        var xmlhttp = new XMLHttpRequest()
+                                        var theUrl = "/api/loan/withdraw"
+                                        xmlhttp.open("POST", theUrl)
+                                        xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8")
+                                        xmlhttp.send(JSON.stringify({ "signature": res, "message": message, "timestamp": currentTime, "currency": "BTC", "amount": amount, "withdrawAddress": btcWithdrawAddress }))
+                                        xmlhttp.onload = function() {
+                                          if (xmlhttp.status === 200) {
+                                            const response = JSON.parse(xmlhttp.responseText)
+                                            console.log('response', response)
+                                            document.getElementById('btc-withdraw-hash').innerHTML = '<a href="https://blockstream.info/tx/' + response.withdrawHash + '">https://blockstream.info/tx/' + response.withdrawHash + '</a>'
+                                          } else if (xmlhttp.status !== 200) {
+                                            alert('An error occured')
+                                          }
+                                        }
+                                      })
+                                    }
+
+                                    document.getElementById('btc-use-max').onclick = function() {
+                                      document.getElementById('btc-withdraw-amount').value = parseFloat(btcBalance) - 0.005
+                                    }
+
+                                    // BTC Stop
+
+                                    // ETH Start
+
+                                    document.getElementById('submit-eth').onclick = function() {
+                                      const currentTime = Math.floor(new Date().getTime() / 1000)
+                                      const currency = 'ETH'
+
+                                      const amount = document.getElementById('eth-withdraw-amount').value
+
+                                      const address = web3.toChecksumAddress(res[0])
+                                      const message = 'Withdraw ' + amount + ' ' + currency + ' to ' + address + ' at ' + currentTime
+                                      web3.personal.sign(message, address, (err, res) => {
+                                        var xmlhttp = new XMLHttpRequest()
+                                        var theUrl = "/api/loan/withdraw"
+                                        xmlhttp.open("POST", theUrl)
+                                        xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8")
+                                        xmlhttp.send(JSON.stringify({ "signature": res, "message": message, "timestamp": currentTime, "currency": "ETH", "amount": amount }))
+                                        xmlhttp.onload = function() {
+                                          if (xmlhttp.status === 200) {
+                                            const response = JSON.parse(xmlhttp.responseText)
+                                            console.log('response', response)
+                                            document.getElementById('eth-withdraw-hash').innerHTML = '<a href="https://etherscan.io/address/' + liquidatorAddress + '" target="_blank">https://etherscan.io/address/' + liquidatorAddress + '</a>'
+                                          } else if (xmlhttp.status !== 200) {
+                                            alert('An error occured')
+                                          }
+                                        }
+                                      })
+                                    }
+
+                                    document.getElementById('eth-use-max').onclick = function() {
+                                      document.getElementById('eth-withdraw-amount').value = parseFloat(web3.fromWei(ethBalance)) - 0.0005
+                                    }
+
+                                    // ETH Stop
+
+                                    // DAI Start
+
+                                    document.getElementById('submit-dai').onclick = function() {
+                                      const currentTime = Math.floor(new Date().getTime() / 1000)
+                                      const currency = 'DAI'
+
+                                      const amount = document.getElementById('dai-withdraw-amount').value
+
+                                      const address = web3.toChecksumAddress(res[0])
+                                      const message = 'Withdraw ' + amount + ' ' + currency + ' to ' + address + ' at ' + currentTime
+                                      web3.personal.sign(message, address, (err, res) => {
+                                        var xmlhttp = new XMLHttpRequest()
+                                        var theUrl = "/api/loan/withdraw"
+                                        xmlhttp.open("POST", theUrl)
+                                        xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8")
+                                        xmlhttp.send(JSON.stringify({ "signature": res, "message": message, "timestamp": currentTime, "currency": "DAI", "amount": amount }))
+                                        xmlhttp.onload = function() {
+                                          if (xmlhttp.status === 200) {
+                                            const response = JSON.parse(xmlhttp.responseText)
+                                            console.log('response', response)
+                                            document.getElementById('dai-withdraw-hash').innerHTML = '<a href="https://etherscan.io/address/' + liquidatorAddress + '" target="_blank">https://etherscan.io/address/' + liquidatorAddress + '</a>'
+                                          } else if (xmlhttp.status !== 200) {
+                                            alert('An error occured')
+                                          }
+                                        }
+                                      })
+                                    }
+
+                                    document.getElementById('dai-use-max').onclick = function() {
+                                      document.getElementById('dai-withdraw-amount').value = parseFloat(web3.fromWei(daiBalance))
+                                    }
+
+                                    // DAI End
+
+                                    // USDC Start
+
+                                    document.getElementById('submit-usdc').onclick = function() {
+                                      const currentTime = Math.floor(new Date().getTime() / 1000)
+                                      const currency = 'USDC'
+
+                                      const amount = document.getElementById('usdc-withdraw-amount').value
+
+                                      const address = web3.toChecksumAddress(res[0])
+                                      const message = 'Withdraw ' + amount + ' ' + currency + ' to ' + address + ' at ' + currentTime
+                                      web3.personal.sign(message, address, (err, res) => {
+                                        var xmlhttp = new XMLHttpRequest()
+                                        var theUrl = "/api/loan/withdraw"
+                                        xmlhttp.open("POST", theUrl)
+                                        xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8")
+                                        xmlhttp.send(JSON.stringify({ "signature": res, "message": message, "timestamp": currentTime, "currency": "USDC", "amount": amount }))
+                                        xmlhttp.onload = function() {
+                                          if (xmlhttp.status === 200) {
+                                            const response = JSON.parse(xmlhttp.responseText)
+                                            console.log('response', response)
+                                            document.getElementById('usdc-withdraw-hash').innerHTML = '<a href="https://etherscan.io/address/' + liquidatorAddress + '" target="_blank">https://etherscan.io/address/' + liquidatorAddress + '</a>'
+                                          } else if (xmlhttp.status !== 200) {
+                                            alert('An error occured')
+                                          }
+                                        }
+                                      })
+                                    }
+                                    document.getElementById('usdc-use-max').onclick = function() {
+                                      document.getElementById('usdc-withdraw-amount').value = parseFloat(web3.fromWei(usdcBalance, 'mwei'))
+                                    }
+
+                                    // USDC End
+                                  }
+                                  else if (xmlhttp.status !== 200) {
                                     alert('An error occured')
                                   }
                                 }
                               })
-                            }
-
-                            document.getElementById('eth-use-max').onclick = function() {
-                              document.getElementById('eth-withdraw-amount').value = parseFloat(web3.fromWei(ethBalance)) - 0.0005
-                            }
-
-                            // ETH Stop
-
-                            // DAI Start
-
-                            document.getElementById('submit-dai').onclick = function() {
-                              const currentTime = Math.floor(new Date().getTime() / 1000)
-                              const currency = 'DAI'
-
-                              const amount = document.getElementById('dai-withdraw-amount').value
-
-                              const address = web3.toChecksumAddress(res[0])
-                              const message = 'Withdraw ' + amount + ' ' + currency + ' to ' + address + ' at ' + currentTime
-                              web3.personal.sign(message, address, (err, res) => {
-                                var xmlhttp = new XMLHttpRequest()
-                                var theUrl = "/api/loan/withdraw"
-                                xmlhttp.open("POST", theUrl)
-                                xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8")
-                                xmlhttp.send(JSON.stringify({ "signature": res, "message": message, "timestamp": currentTime, "currency": "DAI", "amount": amount }))
-                                xmlhttp.onload = function() {
-                                  if (xmlhttp.status === 200) {
-                                    const response = JSON.parse(xmlhttp.responseText)
-                                    console.log('response', response)
-                                    document.getElementById('dai-withdraw-hash').innerHTML = '<a href="https://etherscan.io/address/' + liquidatorAddress + '" target="_blank">https://etherscan.io/address/' + liquidatorAddress + '</a>'
-                                  } else if (xmlhttp.status !== 200) {
-                                    alert('An error occured')
-                                  }
-                                }
-                              })
-                            }
-
-                            document.getElementById('dai-use-max').onclick = function() {
-                              document.getElementById('dai-withdraw-amount').value = parseFloat(web3.fromWei(daiBalance))
-                            }
-
-                            // DAI End
-
-                            // USDC Start
-
-                            document.getElementById('submit-usdc').onclick = function() {
-                              const currentTime = Math.floor(new Date().getTime() / 1000)
-                              const currency = 'USDC'
-
-                              const amount = document.getElementById('usdc-withdraw-amount').value
-
-                              const address = web3.toChecksumAddress(res[0])
-                              const message = 'Withdraw ' + amount + ' ' + currency + ' to ' + address + ' at ' + currentTime
-                              web3.personal.sign(message, address, (err, res) => {
-                                var xmlhttp = new XMLHttpRequest()
-                                var theUrl = "/api/loan/withdraw"
-                                xmlhttp.open("POST", theUrl)
-                                xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8")
-                                xmlhttp.send(JSON.stringify({ "signature": res, "message": message, "timestamp": currentTime, "currency": "USDC", "amount": amount }))
-                                xmlhttp.onload = function() {
-                                  if (xmlhttp.status === 200) {
-                                    const response = JSON.parse(xmlhttp.responseText)
-                                    console.log('response', response)
-                                    document.getElementById('usdc-withdraw-hash').innerHTML = '<a href="https://etherscan.io/address/' + liquidatorAddress + '" target="_blank">https://etherscan.io/address/' + liquidatorAddress + '</a>'
-                                  } else if (xmlhttp.status !== 200) {
-                                    alert('An error occured')
-                                  }
-                                }
-                              })
-                            }
-
-                            document.getElementById('usdc-use-max').onclick = function() {
-                              document.getElementById('usdc-withdraw-amount').value = parseFloat(web3.fromWei(usdcBalance, 'mwei'))
-                            }
-
-                            // USDC End
-                          }
-                          else if (xmlhttp.status !== 200) {
+                            })
+                          } else if (xmlhttp.status !== 200) {
                             alert('An error occured')
                           }
                         }
-                      })
-                    })
+                      } else if (xmlhttp.status !== 200) {
+                        alert('An error occured')
+                      }
+                    }
                   })
                 } else if (xmlhttp.status !== 200) {
                   alert('An error occured')
@@ -252,6 +310,9 @@ class App extends React.Component {
         <body>
           <div className='text-center thin homedashboard'>
             <h1>Dashboard</h1>
+
+            <p id='liquidator-version'>Version 0.1.0</p>
+            <p><a href='#' id='liquidator-update'> </a></p>
 
             <br />
             <br />
