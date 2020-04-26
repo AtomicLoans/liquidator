@@ -107,8 +107,10 @@ class App extends React.Component {
                                     const response = JSON.parse(xmlhttp.responseText)
                                     console.log('response', response)
 
-                                    if (response.message === 'success') {
+                                    if (response.message === 'Success') {
                                       document.getElementById('liquidator-status').innerHTML = "Updating... (refresh in 2 min)"
+                                    } else {
+                                      alert('An error occured')
                                     }
                                   } else if (xmlhttp.status !== 200) {
                                     alert('An error occured')
