@@ -131,12 +131,12 @@ function defineAgentRoutes (router) {
         const { heroku_api_key: token } = mnemonic
 
         if (token) {
-          const { status, data: release } = await axios.get('https://api.github.com/repos/AtomicLoans/agent/releases/latest')
+          const { status, data: release } = await axios.get('https://api.github.com/repos/AtomicLoans/liquidator/releases/latest')
 
           if (status === 200) {
             const { name } = release
 
-            const params = { source_blob: { url: `https://github.com/AtomicLoans/agent/archive/${name}.tar.gz` } }
+            const params = { source_blob: { url: `https://github.com/AtomicLoans/liquidator/archive/${name}.tar.gz` } }
             const config = {
               headers: {
                 Accept: 'application/vnd.heroku+json; version=3',
