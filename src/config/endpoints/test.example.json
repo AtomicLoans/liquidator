@@ -1,4 +1,5 @@
 {
   "LENDER_ENDPOINT": "http://localhost:3030/api/loan",
-  "ARBITER_ENDPOINT": "http://localhost:3032/api/loan"
+  "ARBITER_ENDPOINT": "http://localhost:3032/api/loan",
+  "LIQUIDATOR_ENDPOINT": "http://localhost:3034/api/loan"
 }

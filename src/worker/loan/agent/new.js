@@ -3,7 +3,7 @@ const axios = require('axios')
 const { getEndpoint } = require('../../../utils/endpoints')
 const LoanMarket = require('../../../models/LoanMarket')
 
-const { NETWORK, HEROKU_APP, AL_APP, AGENT_URL } = process.env
+const { NETWORK, HEROKU_APP } = process.env
 
 function defineNewAgentJobs (agenda) {
   agenda.define('notify-arbiter', async (job, done) => {
@@ -12,17 +12,13 @@ function defineNewAgentJobs (agenda) {
 
     const { collateralPublicKey, principalAddress } = await loanMarket.getAgentAddresses()
 
-    // TODO add logic that only notifies arbiter if heroku app
-
     let url
     if (NETWORK === 'test') {
-      url = getEndpoint('LENDER_ENDPOINT')
+      url = getEndpoint('LIQUIDATOR_ENDPOINT')
     } else if (HEROKU_APP !== undefined && HEROKU_APP !== 'undefined') {
       url = `https://${HEROKU_APP}.herokuapp.com/api/loan`
-    } else if (AL_APP === 'true') {
-      url = 'https://atomicloans.io/lender-agent/api/loan'
     } else {
-      url = `${AGENT_URL}/api/loan`
+      done()
     }
 
     console.log('notify-arbiter')

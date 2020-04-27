@@ -25,6 +25,10 @@ async function start () {
 
   await agenda.every(getInterval('SANITIZE_TX_INTERVAL'), 'sanitize-eth-txs')
 
+  if (NODE_ENV === 'test' || (HEROKU_APP !== undefined && HEROKU_APP !== 'undefined')) {
+    await agenda.now('notify-arbiter')
+  }
+
   agenda.define('restart', async (job, done) => {
     await start()
     done()
