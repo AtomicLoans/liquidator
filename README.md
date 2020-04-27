@@ -22,4 +22,6 @@ You can also run it
 
 ## Deploy your own Atomic Agent
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy) [![Greenkeeper badge](https://badges.greenkeeper.io/AtomicLoans/agent.svg)](https://greenkeeper.io/)
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
+[![Known Vulnerabilities](https://snyk.io/test/github/atomicloans/liquidator/badge.svg)](https://snyk.io/test/github/atomicloans/liquidator)
