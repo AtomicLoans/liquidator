@@ -203,7 +203,7 @@ async function checkSales (loanMarket, agenda, medianBtcPrice) {
       // check arbiter / lender agent endpoint
 
       const { data: unfilteredAgents } = await axios.get(
-            `${getEndpoint('ARBITER_ENDPOINT')}/agents`
+        `${getEndpoint('ARBITER_ENDPOINT')}/agents`
       )
 
       const { lender: lenderPrincipalAddress } = await sales.methods.sales(numToBytes32(saleId)).call()
@@ -213,9 +213,17 @@ async function checkSales (loanMarket, agenda, medianBtcPrice) {
       )
       const lenderUrl = agents[0].url
 
-      const {
-        data: { secretB }
-      } = await axios.get(`${lenderUrl}/sales/contract/${principal}/${saleId}`)
+      let secretB
+      const { data: lenderSalesData } = await axios.get(`${lenderUrl}/sales`)
+      const filteredLenderSales = lenderSalesData.filter(sale => sale.principal === principal && sale.saleId === saleId && sale.secretB !== undefined)
+
+      if (filteredLenderSales.length > 0) {
+        secretB = filteredLenderSales[0].secretB
+      }
+
+      // const {
+      //   data: { secretB }
+      // } = await axios.get(`${lenderUrl}/sales/contract/${principal}/${saleId}`)
       console.log(`${lenderUrl}/sales/contract/${principal}/${saleId}`)
       const {
         data: { secretC, initTxHash }
@@ -243,8 +251,6 @@ async function checkSales (loanMarket, agenda, medianBtcPrice) {
         await saleModel.save()
       }
     }
-    // }
-    // }
   }
 }
 
