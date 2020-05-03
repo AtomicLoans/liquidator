@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const Agenda = require('agenda')
 const express = require('express')
 
-const agenda = new Agenda({ mongo: mongoose.connection, maxConcurrency: 1000, defaultConcurrency: 1000, defaultLockLifetime: 500 })
+const agenda = new Agenda({ mongo: mongoose.connection, maxConcurrency: 1000, defaultConcurrency: 1000, defaultLockLifetime: 10000 })
 
 const { getInterval } = require('../utils/intervals')
 
