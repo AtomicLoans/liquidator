@@ -90,6 +90,8 @@ const SaleSchema = new mongoose.Schema({
   }
 })
 
+SaleSchema.index({ principal: 1, saleId: 1 }, { unique: true, partialFilterExpression: { principal: { $type: 'string' }, saleId: { $type: 'int' } } })
+
 SaleSchema.methods.principalClient = function () {
   return clients[currencies[this.principal].chain]
 }

@@ -178,73 +178,76 @@ async function checkSales (loanMarket, agenda, medianBtcPrice) {
     // if (BN(collateralValue).isGreaterThan(discountBuy)) {
     console.log('SHOULD CLAIM COLLATERAL')
 
-    if (process.env.NODE_ENV === 'test') {
-      const initUtxos = await saleModel.collateralClient().getMethod('jsonrpc')('listunspent', 1, 999999, [collateralSwapRefundableP2SHAddress])
-      if (initUtxos.length > 0) {
-        const initUtxo = initUtxos[0]
-        const { txid: initTxHash } = initUtxo
+    try {
+      if (process.env.NODE_ENV === 'test') {
+        const initUtxos = await saleModel.collateralClient().getMethod('jsonrpc')('listunspent', 1, 999999, [collateralSwapRefundableP2SHAddress])
+        if (initUtxos.length > 0) {
+          const initUtxo = initUtxos[0]
+          const { txid: initTxHash } = initUtxo
 
-        const { secretB, secretC } = await sales.methods.secretHashes(numToBytes32(saleId)).call()
+          const { secretB, secretC } = await sales.methods.secretHashes(numToBytes32(saleId)).call()
+
+          console.log('initTxHash', initTxHash)
+          console.log('secretB', secretB)
+          console.log('secretC', secretC)
+
+          saleModel.secretB = secretB
+          saleModel.secretC = secretC
+          saleModel.initTxHash = initTxHash
+          saleModel.status = 'SECRETS_PROVIDED'
+
+          await saleModel.save()
+
+          agenda.now('claim-collateral', { saleModelId: saleModel.id })
+        }
+      } else {
+        // check arbiter / lender agent endpoint
+
+        const { data: unfilteredAgents } = await axios.get(
+              `${getEndpoint('ARBITER_ENDPOINT')}/agents`
+        )
+
+        const { lender: lenderPrincipalAddress } = await sales.methods.sales(numToBytes32(saleId)).call()
+
+        const agents = unfilteredAgents.filter(
+          agent => agent.principalAddress === ensure0x(lenderPrincipalAddress) && agent.status === 'ACTIVE'
+        )
+        const lenderUrl = agents[0].url
+
+        const {
+          data: { secretB }
+        } = await axios.get(`${lenderUrl}/sales/contract/${principal}/${saleId}`)
+        console.log(`${lenderUrl}/sales/contract/${principal}/${saleId}`)
+        const {
+          data: { secretC, initTxHash }
+        } = await axios.get(
+              `${getEndpoint('ARBITER_ENDPOINT')}/sales/contract/${principal}/${saleId}`
+        )
+        console.log(`${getEndpoint('ARBITER_ENDPOINT')}/sales/contract/${principal}/${saleId}`)
 
         console.log('initTxHash', initTxHash)
         console.log('secretB', secretB)
         console.log('secretC', secretC)
 
-        saleModel.secretB = secretB
-        saleModel.secretC = secretC
-        saleModel.initTxHash = initTxHash
-        saleModel.status = 'SECRETS_PROVIDED'
+        if (secretB && secretC && initTxHash) {
+          saleModel.secretB = secretB
+          saleModel.secretC = secretC
+          saleModel.initTxHash = initTxHash
+          saleModel.status = 'SECRETS_PROVIDED'
 
-        await saleModel.save()
+          await saleModel.save()
 
-        agenda.now('claim-collateral', { saleModelId: saleModel.id })
+          agenda.now('claim-collateral', { saleModelId: saleModel.id })
+        } else {
+          saleModel.status = 'COLLATERAL_SENT'
+
+          await saleModel.save()
+        }
       }
-    } else {
-      // check arbiter / lender agent endpoint
-
-      const { data: unfilteredAgents } = await axios.get(
-            `${getEndpoint('ARBITER_ENDPOINT')}/agents`
-      )
-
-      const { lender: lenderPrincipalAddress } = await sales.methods.sales(numToBytes32(saleId)).call()
-
-      const agents = unfilteredAgents.filter(
-        agent => agent.principalAddress === ensure0x(lenderPrincipalAddress) && agent.status === 'ACTIVE'
-      )
-      const lenderUrl = agents[0].url
-
-      const {
-        data: { secretB }
-      } = await axios.get(`${lenderUrl}/sales/contract/${principal}/${saleId}`)
-      console.log(`${lenderUrl}/sales/contract/${principal}/${saleId}`)
-      const {
-        data: { secretC, initTxHash }
-      } = await axios.get(
-            `${getEndpoint('ARBITER_ENDPOINT')}/sales/contract/${principal}/${saleId}`
-      )
-      console.log(`${getEndpoint('ARBITER_ENDPOINT')}/sales/contract/${principal}/${saleId}`)
-
-      console.log('initTxHash', initTxHash)
-      console.log('secretB', secretB)
-      console.log('secretC', secretC)
-
-      if (secretB && secretC && initTxHash) {
-        saleModel.secretB = secretB
-        saleModel.secretC = secretC
-        saleModel.initTxHash = initTxHash
-        saleModel.status = 'SECRETS_PROVIDED'
-
-        await saleModel.save()
-
-        agenda.now('claim-collateral', { saleModelId: saleModel.id })
-      } else {
-        saleModel.status = 'COLLATERAL_SENT'
-
-        await saleModel.save()
-      }
+    } catch(e) {
+      console.log(`Error: ${e}`)
+      handleError(e)
     }
-    // }
-    // }
   }
 }
 
