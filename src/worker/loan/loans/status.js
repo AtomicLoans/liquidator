@@ -244,7 +244,7 @@ async function checkSales (loanMarket, agenda, medianBtcPrice) {
           await saleModel.save()
         }
       }
-    } catch(e) {
+    } catch (e) {
       console.log(`Error: ${e}`)
       handleError(e)
     }
