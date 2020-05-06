@@ -1,3 +1,8 @@
+## [0.1.8](https://github.com/AtomicLoans/liquidator/compare/v0.1.7...v0.1.8) - 2020-05-06
+
+- Fix loan status bug
+- Ensure no duplicate Loan or Sale models
+
 ## [0.1.7](https://github.com/AtomicLoans/liquidator/compare/v0.1.6...v0.1.7) - 2020-05-03
 
 - notify arbiter
