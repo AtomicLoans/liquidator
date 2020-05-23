@@ -91,6 +91,9 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
       console.log('principal', principal)
 
       if (tokenBalance >= discountCollateralValue) {
+        console.log('tokenBalance sufficient')
+        console.log('currentTime', currentTime)
+        console.log('loanExpiration', loanExpiration)
         if (currentTime > loanExpiration) {
           console.log('DEFAULTED')
 
