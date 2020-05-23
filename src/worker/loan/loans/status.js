@@ -54,6 +54,8 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
   const loans = getObject('loans', principal)
   const token = getObject('erc20', principal)
 
+  console.log('token', token)
+
   const principalAddress = await (web3().currentProvider.getAddresses())[0]
 
   const currentTime = await getCurrentTime()
@@ -87,11 +89,6 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
       console.log('tokenBalance', tokenBalance)
 
       console.log('principal', principal)
-
-
-      console.log('tokenBalance', tokenBalance.toNumber())
-      console.log('discountCollateralValue', discountCollateralValue.toNumber())
-
 
       if (tokenBalance >= discountCollateralValue) {
         if (currentTime > loanExpiration) {
