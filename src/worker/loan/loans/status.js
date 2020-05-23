@@ -90,6 +90,9 @@ async function checkLoans (loanMarket, agenda, medianBtcPrice) {
 
       console.log('principal', principal)
 
+      console.log('typeof(tokenBalance)', typeof(tokenBalance))
+      console.log('typeof(discountCollateralValue)', typeof(discountCollateralValue))
+
       if (tokenBalance >= discountCollateralValue) {
         console.log('tokenBalance sufficient')
         console.log('currentTime', currentTime)
