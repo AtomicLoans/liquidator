@@ -1,3 +1,7 @@
+## [0.1.9](https://github.com/AtomicLoans/liquidator/compare/v0.1.8...v0.1.9) - 2020-05-23
+
+- Fix token balance comparison on liquidate
+
 ## [0.1.8](https://github.com/AtomicLoans/liquidator/compare/v0.1.7...v0.1.8) - 2020-05-06
 
 - Fix loan status bug
