@@ -115,7 +115,7 @@ function defineLoansRouter (router) {
 
       res.json(loan.json())
     } catch (e) {
-      console.log(e)
+      console.log(`Proof of Funds 401 ${e}`)
       return next(res.createError(401, e))
     }
   }))

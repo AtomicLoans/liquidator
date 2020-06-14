@@ -40,9 +40,8 @@ function defineLoanStatusJobs (agenda) {
 
       done()
     } catch (e) {
+      console.log(`Check Loan Statuses And Update Job ${e}`)
       handleError(e)
-      console.log('ERROR')
-      console.log(e)
       done()
     }
   })
