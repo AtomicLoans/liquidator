@@ -167,8 +167,8 @@ function defineSalesInitJobs (agenda) {
       }
       done()
     } catch (e) {
+      console.log(`Init Liquidation Job ${e}`)
       handleError(e)
-      console.log(e)
       done()
     }
   })

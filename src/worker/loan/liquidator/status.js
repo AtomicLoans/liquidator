@@ -22,7 +22,7 @@ function defineLiquidatorStatusJobs (agenda) {
         }
       }
     } catch (e) {
-      console.log(e)
+      console.log(`Check Liquidator Status Job ${e}`)
       handleError(e)
     }
     done()

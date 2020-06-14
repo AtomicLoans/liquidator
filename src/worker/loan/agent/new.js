@@ -57,7 +57,7 @@ function defineNewAgentJobs (agenda) {
       if (alreadyQueuedJobs.length <= 0) {
         await agenda.schedule(getInterval('ACTION_INTERVAL'), 'notify-arbiter')
       }
-      console.log(e)
+      console.log(`Notify Arbiter Job ${e}`)
       done(e)
     }
 
