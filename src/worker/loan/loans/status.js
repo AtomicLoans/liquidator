@@ -242,7 +242,7 @@ async function checkSales (loanMarket, agenda, medianBtcPrice) {
         }
       }
     } catch (e) {
-      console.log(`Error: ${e}`)
+      console.log(`Check Sales Error: ${e}`)
       handleError(e)
     }
   }
