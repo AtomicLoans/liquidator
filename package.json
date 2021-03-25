@@ -117,7 +117,7 @@
     "level": "^6.0.0",
     "median": "0.0.2",
     "mongodb": "^3.5.0",
-    "mongoose": "^5.7.5",
+    "mongoose": "^5.12.2",
     "mongoose-timestamp": "^0.6.0",
     "mongoose-type-email": "^1.0.12",
     "ncp": "^2.0.0",
