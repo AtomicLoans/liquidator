@@ -83,7 +83,7 @@
     "@mblackmblack/migrate-mongo": "^6.0.8",
     "@mblackmblack/to-seconds": "^0.1.0",
     "@sentry/node": "^5.5.0",
-    "@truffle/hdwallet-provider": "^1.0.18",
+    "@truffle/hdwallet-provider": "^1.0.40",
     "agenda": "^3.0.0",
     "agendash": "^1.0.0",
     "axios": "^0.19.0",
@@ -129,7 +129,7 @@
     "request-ip": "^2.1.3",
     "truffle": "^5.1.5",
     "truffle-hdwallet-provider": "^1.0.17",
-    "web3": "^1.2.1"
+    "web3": "^1.3.6"
   },
   "devDependencies": {
     "@liquality/bitcoin-ledger-provider": "^0.4.23",
