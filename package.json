@@ -111,7 +111,7 @@
     "gh-release": "^3.5.0",
     "helmet": "^3.18.0",
     "http-errors": "^1.7.3",
-    "ioredis": "^4.11.2",
+    "ioredis": "^4.27.8",
     "is-ci": "^2.0.0",
     "keccak256": "^1.0.0",
     "level": "^6.0.0",
