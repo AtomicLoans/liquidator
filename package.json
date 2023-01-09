@@ -105,7 +105,7 @@
     "express-async-handler": "^1.1.4",
     "express-basic-auth": "^1.2.0",
     "express-react-views": "^0.11.0",
-    "extract-zip": "^1.6.7",
+    "extract-zip": "^2.0.0",
     "fastq": "^1.6.0",
     "fs": "0.0.1-security",
     "gh-release": "^3.5.0",
