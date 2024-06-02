@@ -82,7 +82,7 @@
     "@liquality/ethereum-utils": "^0.4.23",
     "@mblackmblack/migrate-mongo": "^6.0.8",
     "@mblackmblack/to-seconds": "^0.1.0",
-    "@sentry/node": "^5.5.0",
+    "@sentry/node": "^5.15.4",
     "@truffle/hdwallet-provider": "^1.0.18",
     "agenda": "^3.0.0",
     "agendash": "^1.0.0",
