@@ -85,7 +85,7 @@
     "@sentry/node": "^5.5.0",
     "@truffle/hdwallet-provider": "^1.0.18",
     "agenda": "^3.0.0",
-    "agendash": "^1.0.0",
+    "agendash": "^2.0.0",
     "axios": "^0.19.0",
     "bignumber.js": "^9.0.0",
     "bip39": "^3.0.2",
